@@ -1,0 +1,19 @@
+From: Stripe <receipts@stripe.com>
+To: triage-test@example.com
+Subject: Your receipt from Grootan Technologies #2026-0511-04421
+Date: Mon, 11 May 2026 04:55:00 +0000
+Message-ID: <sample-09-other-receipt@stripe.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+
+Receipt #2026-0511-04421
+Amount paid: $49.00 USD
+Date paid:   May 11, 2026
+Payment method: Visa ending in 4242
+
+Description: Grootan Workflow Cloud · Pro plan · monthly
+
+This is an automated receipt — no action required.
+Manage your subscription: https://billing.stripe.com/p/login/test_abc123
+
+Stripe, Inc. · 510 Townsend Street · San Francisco, CA 94103

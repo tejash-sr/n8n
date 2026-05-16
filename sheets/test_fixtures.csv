@@ -1,0 +1,11 @@
+sample_file,expected_category,message_id,actual_category,match,notes
+sample_01_lead_rfp.eml,LEAD,,,,Formal RFP from corp domain with team size + timeline = HIGH priority
+sample_02_lead_casual.eml,LEAD,,,,Casual founder DM, vague needs = LOW/MEDIUM priority
+sample_03_lead_quote.eml,LEAD,,,,Direct quote request with budget hint = HIGH priority
+sample_04_support_bug.eml,SUPPORT,,,,Existing customer reports broken integration
+sample_05_support_howto.eml,SUPPORT,,,,Existing customer how-to question
+sample_06_spam_seo.eml,SPAM,,,,Cold SEO pitch with discount + unsubscribe
+sample_07_spam_newsletter.eml,SPAM,,,,Marketing newsletter with list-unsubscribe header
+sample_08_other_calendar.eml,OTHER,,,,Calendar invite forwarded internally
+sample_09_other_receipt.eml,OTHER,,,,Automated SaaS receipt
+sample_10_other_bounce.eml,OTHER,,,,Mailer-daemon bounce notification

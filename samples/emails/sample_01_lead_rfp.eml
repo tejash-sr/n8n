@@ -1,0 +1,28 @@
+From: Priya Raman <priya.raman@acme.com>
+To: triage-test@example.com
+Subject: RFP — Workflow automation for 200-person ops team
+Date: Mon, 11 May 2026 14:30:00 +0530
+Message-ID: <sample-01-lead-rfp@acme.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+
+Hi Grootan team,
+
+We're a 200-person ops organisation at Acme Logistics and we're evaluating
+vendors for an end-to-end ticket-triage + workflow automation rollout. We
+have a hard internal target of going live by Q3 2026 and our CTO will
+sponsor the evaluation.
+
+Could you share an indicative scope of work for the following:
+
+  1. Inbound ticket classification (4–6 categories)
+  2. Routing into our existing helpdesk (Freshdesk)
+  3. SLA dashboards for ops leadership
+
+We'd like a 30-minute discovery call next week. Please share 2–3 slots
+that work for your team and I will confirm.
+
+Best,
+Priya Raman
+Director of Operations · Acme Logistics
+priya.raman@acme.com · +91 98xxxxxx12

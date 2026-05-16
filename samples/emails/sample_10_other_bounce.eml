@@ -1,0 +1,23 @@
+From: Mail Delivery Subsystem <mailer-daemon@googlemail.com>
+To: triage-test@example.com
+Subject: Delivery Status Notification (Failure)
+Date: Mon, 11 May 2026 12:22:00 +0000
+Message-ID: <sample-10-other-bounce@googlemail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+
+Delivery to the following recipient failed permanently:
+
+     non-existent-user@some-domain-that-does-not-exist.example
+
+Technical details of permanent failure:
+DNS Error: 35196919 DNS type 'mx' lookup of some-domain-that-does-not-exist.example
+responded with code NXDOMAIN.
+
+----- Original message -----
+
+From: triage-test@example.com
+To: non-existent-user@some-domain-that-does-not-exist.example
+Subject: Re: test outbound
+
+This is the body of the test outbound that bounced.

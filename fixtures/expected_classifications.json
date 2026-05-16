@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "description": "Ground truth for the 10 seed emails in samples/emails/. Used by docs/EVALUATION_RUBRIC.md and by humans grading accuracy in the test_fixtures Sheet tab.",
+    "schema_version": 1,
+    "last_updated": "2026-05-11"
+  },
+  "samples": [
+    { "file": "sample_01_lead_rfp.eml",         "expected_category": "LEAD",    "expected_priority": "HIGH",   "rationale": "RFP wording, 200-person team, hard Q3 timeline, CTO sponsor." },
+    { "file": "sample_02_lead_casual.eml",      "expected_category": "LEAD",    "expected_priority": "LOW",    "rationale": "Casual, free webmail, no specifics — qualifying call needed." },
+    { "file": "sample_03_lead_quote.eml",       "expected_category": "LEAD",    "expected_priority": "HIGH",   "rationale": "Explicit budget envelope $15-25k, named scope, asks for slots." },
+    { "file": "sample_04_support_bug.eml",      "expected_category": "SUPPORT", "expected_priority": null,     "rationale": "Existing customer reporting production webhook 502s." },
+    { "file": "sample_05_support_howto.eml",    "expected_category": "SUPPORT", "expected_priority": null,     "rationale": "Existing customer asking how-to about credential rotation." },
+    { "file": "sample_06_spam_seo.eml",         "expected_category": "SPAM",    "expected_priority": null,     "rationale": "Generic SEO discount pitch with unsubscribe footer." },
+    { "file": "sample_07_spam_newsletter.eml",  "expected_category": "SPAM",    "expected_priority": null,     "rationale": "Newsletter with 'view in browser' + list-unsubscribe header." },
+    { "file": "sample_08_other_calendar.eml",   "expected_category": "OTHER",   "expected_priority": null,     "rationale": "Google Calendar invitation — automated." },
+    { "file": "sample_09_other_receipt.eml",    "expected_category": "OTHER",   "expected_priority": null,     "rationale": "Stripe automated receipt for an existing subscription." },
+    { "file": "sample_10_other_bounce.eml",     "expected_category": "OTHER",   "expected_priority": null,     "rationale": "Mailer-daemon delivery failure notification." }
+  ]
+}

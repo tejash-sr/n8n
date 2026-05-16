@@ -1,0 +1,50 @@
+{
+  "_comment": "Block Kit payload posted to Slack for every LEAD. Used by the 'Post lead card' node. Color emoji per priority: HIGH 🔴, MEDIUM 🟠, LOW 🟢.",
+  "channel": "{{ $node[\"Config\"].json.slackChannel }}",
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "{{ ({HIGH:'🔴', MEDIUM:'🟠', LOW:'🟢'})[$json.suggested_priority] }} New lead — {{ $json.suggested_priority }}",
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        { "type": "mrkdwn", "text": "*From:*\n{{ $json.sender_email }}" },
+        { "type": "mrkdwn", "text": "*Domain:*\n{{ $json.sender_domain }}" },
+        { "type": "mrkdwn", "text": "*Subject:*\n{{ $json.subject_clean }}" },
+        { "type": "mrkdwn", "text": "*Confidence:*\n{{ Math.round($json.confidence * 100) }}%" }
+      ]
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Preview:*\n>{{ $json.body_clean.slice(0, 300).replace(/\\n/g, '\\n>') }}"
+      }
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": { "type": "plain_text", "text": "Open draft in Gmail", "emoji": true },
+          "url": "https://mail.google.com/mail/u/0/#drafts/{{ $node[\"Create Gmail draft\"].json.id }}",
+          "style": "primary"
+        }
+      ]
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": "_Triaged by LeadInboxTriageBot · message_id `{{ $json.message_id }}` · {{ $now.toISO() }}_"
+        }
+      ]
+    }
+  ]
+}
