@@ -273,7 +273,7 @@ def make_classify_node(pos: list[int]) -> dict:
                     },
                     {
                         "role": "user",
-                        "content": "=Subject: {{ $json.subject_clean }}\n\nFrom: {{ $json.sender_email }} (domain: {{ $json.sender_domain }})\n\nBody:\n{{ ($json.body_clean || '').slice(0, 2000) }}",
+                        "content": "=Subject: {{ ($json.subject_clean || '').slice(0, 200) }}\n\nFrom: {{ ($json.sender_email || '').slice(0, 254) }} (domain: {{ ($json.sender_domain || '').slice(0, 100) }})\n\nBody:\n{{ ($json.body_clean || '').slice(0, 2000) }}",
                     },
                 ]
             },
