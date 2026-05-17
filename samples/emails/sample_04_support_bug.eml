@@ -1,0 +1,23 @@
+From: Meera Iyer <meera@globex.io>
+To: triage-test@example.com
+Subject: [Production] Webhook failing intermittently since 09:00 IST
+Date: Mon, 11 May 2026 09:42:18 +0530
+Message-ID: <sample-04-support-bug@globex.io>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+
+Hi support,
+
+We've been a customer for ~8 months. Since this morning around 09:00 IST our
+"OrderCreated" webhook (configured through the Grootan Workflow plugin) is
+failing intermittently with 502s. Roughly 1 in 5 requests fails. Retry policy
+is set to 3 with 30s backoff but several still drop.
+
+Trace ID: trc_5b1a-9f00-acme-orders
+Workflow ID: wf_pq_3492
+
+Could someone take a look? Happy to jump on a Zoom if it helps.
+
+Thanks,
+Meera Iyer
+Engineering Lead · Globex

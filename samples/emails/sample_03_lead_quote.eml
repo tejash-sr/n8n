@@ -1,0 +1,26 @@
+From: Karthik N <karthik.n@deliverhub.co>
+To: triage-test@example.com
+Subject: Quote request — DeliverHub onboarding workflows
+Date: Mon, 11 May 2026 16:45:00 +0530
+Message-ID: <sample-03-lead-quote@deliverhub.co>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+
+Hi team,
+
+We're rolling out automated onboarding for ~50 new partners/month at
+DeliverHub and would like a fixed-bid quote for the n8n integration work.
+Budget envelope is roughly $15-25k for the first phase. Stack: PostgreSQL,
+Slack, Gmail, Stripe.
+
+Specifically:
+  - KYC document collection workflow
+  - Partner welcome email sequence
+  - Slack channel auto-provisioning per partner
+
+If this is something you can scope this week, please share next steps and
+2–3 time slots for a 20-minute call.
+
+Thanks,
+Karthik N
+Head of Partnerships, DeliverHub

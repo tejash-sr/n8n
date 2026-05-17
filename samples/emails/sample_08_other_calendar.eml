@@ -1,0 +1,21 @@
+From: Calendar <calendar-notification@google.com>
+To: triage-test@example.com
+Subject: Invitation: Internal weekly sync @ Tue 14:00 IST (santhosh@grootan.com)
+Date: Mon, 11 May 2026 07:00:00 +0530
+Message-ID: <sample-08-other-calendar@google.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+
+You have been invited to the following event.
+
+Title:    Internal weekly sync
+When:     Tuesday, 12 May 2026  14:00 – 14:30  (IST)
+Where:    Google Meet
+Calendar: triage-test@example.com
+Who:      santhosh@grootan.com - organizer
+          triage-test@example.com
+
+Event details:
+https://calendar.google.com/calendar/event?eid=abcdef123
+
+Going (triage-test@example.com)?   Yes - Maybe - No

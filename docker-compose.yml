@@ -1,0 +1,50 @@
+# ============================================================================
+# Local n8n stack for the Lead Inbox Triage Bot
+# ----------------------------------------------------------------------------
+# Usage:
+#   1. cp .env.example .env  &&  edit .env
+#   2. docker compose up -d
+#   3. Open http://localhost:5678  (login with N8N_BASIC_AUTH_USER/PASSWORD)
+#   4. Import workflows from ./workflows/ (see docs/SETUP.md)
+#
+# Volumes:
+#   n8n_data : persists workflows, credentials, executions, encryption metadata
+#
+# Notes:
+#   - We DO NOT expose Postgres / Redis for the training environment.
+#     n8n's built-in SQLite is sufficient and matches what trainees run locally.
+#   - If you need a stronger production setup, see docs/RUNBOOK.md §Scaling.
+# ============================================================================
+version: "3.8"
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: lead-triage-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=${N8N_PORT}
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - TZ=${TZ}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      # Expose LLM keys to n8n so credentials can reference them if needed.
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # Avoid noisy permission warning on first boot
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_LOG_LEVEL=info
+    volumes:
+      - n8n_data:/home/node/.n8n
+      # Read-only mount so workflow JSONs are easy to import via the UI
+      - ./workflows:/workflows:ro
+
+volumes:
+  n8n_data:
+    name: lead_triage_n8n_data

@@ -1,0 +1,20 @@
+From: Rohit S <rohit.s@brightlabs.in>
+To: triage-test@example.com
+Subject: How do I rotate the OAuth credential without re-importing the workflow?
+Date: Mon, 11 May 2026 11:10:00 +0530
+Message-ID: <sample-05-support-howto@brightlabs.in>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+
+Hi team,
+
+Quick how-to question — we need to rotate the Google OAuth client secret on
+our production Workflow tenant (we use Grootan's n8n bundle) without
+re-importing every workflow. Is there a UI flow for this, or do we need to
+edit credentials.json by hand?
+
+We have ~40 workflows and don't want to rebind credentials one by one.
+
+Thanks!
+Rohit S
+DevOps · BrightLabs

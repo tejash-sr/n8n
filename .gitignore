@@ -1,0 +1,42 @@
+# ---- Secrets & credentials (NEVER commit) ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+credentials/
+token.json
+service-account*.json
+oauth*.json
+**/secrets/**
+
+# n8n local state (must never leak credentials or DB)
+.n8n/
+n8n_data/
+database.sqlite
+*.sqlite
+*.db
+
+# Node / Python build artifacts
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Logs
+*.log
+logs/
+
+# Local Docker volumes
+docker-data/
