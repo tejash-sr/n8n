@@ -604,41 +604,43 @@ def make_create_gmail_draft(pos: list[int]) -> dict:
 
 
 def make_slack_card(pos: list[int]) -> dict:
-    blocks = json.dumps([
-        {
-            "type": "header",
-            "text": {
-                "type": "plain_text",
-                "text": "=🚀 New lead — {{ $('Parse classification').item.json.suggested_priority }}",
-                "emoji": True,
-            },
-        },
-        {
-            "type": "section",
-            "fields": [
-                {"type": "mrkdwn", "text": "=*From:*\n{{ $('Parse classification').item.json.sender_email }}"},
-                {"type": "mrkdwn", "text": "=*Domain:*\n{{ $('Parse classification').item.json.sender_domain }}"},
-                {"type": "mrkdwn", "text": "=*Subject:*\n{{ $('Parse classification').item.json.subject_clean }}"},
-                {"type": "mrkdwn", "text": "=*Confidence:*\n{{ Math.round($('Parse classification').item.json.confidence * 100) }}%"},
-            ],
-        },
-        {
-            "type": "section",
-            "text": {"type": "mrkdwn",
-                     "text": "=*Preview:*\n> {{ ($('Parse classification').item.json.body_clean || '').slice(0, 300).replace(/\\n/g, '\\n> ') }}"},
-        },
-        {
-            "type": "actions",
-            "elements": [
-                {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "Open draft in Gmail", "emoji": True},
-                    "url": "=https://mail.google.com/mail/u/0/#drafts/{{ $('Create Gmail draft').item.json.id }}",
-                    "style": "primary",
-                }
-            ],
-        },
-    ], indent=2)
+    blocks = """={{ JSON.stringify([
+  {
+    type: 'header',
+    text: {
+      type: 'plain_text',
+      text: '🚀 New lead — ' + $('Parse classification').item.json.suggested_priority,
+      emoji: true
+    }
+  },
+  {
+    type: 'section',
+    fields: [
+      { type: 'mrkdwn', text: '*From:*\\n' + $('Parse classification').item.json.sender_email },
+      { type: 'mrkdwn', text: '*Domain:*\\n' + $('Parse classification').item.json.sender_domain },
+      { type: 'mrkdwn', text: '*Subject:*\\n' + $('Parse classification').item.json.subject_clean },
+      { type: 'mrkdwn', text: '*Confidence:*\\n' + Math.round($('Parse classification').item.json.confidence * 100) + '%' }
+    ]
+  },
+  {
+    type: 'section',
+    text: {
+      type: 'mrkdwn',
+      text: '*Preview:*\\n> ' + (($('Parse classification').item.json.body_clean || '').slice(0, 300).replace(/\\n/g, '\\n> '))
+    }
+  },
+  {
+    type: 'actions',
+    elements: [
+      {
+        type: 'button',
+        text: { type: 'plain_text', text: 'Open draft in Gmail', emoji: true },
+        url: 'https://mail.google.com/mail/u/0/#drafts/' + $('Create Gmail draft').item.json.id,
+        style: 'primary'
+      }
+    ]
+  }
+], null, 2) }}"""
     return _node(
         "Post lead card",
         "n8n-nodes-base.slack",
