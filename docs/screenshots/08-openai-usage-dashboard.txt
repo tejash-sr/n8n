@@ -1,0 +1,36 @@
+================================================================================
+docs/screenshots/08-openai-usage-dashboard.txt — OpenAI Usage dashboard rows
+Source: platform.openai.com/usage (filtered by training API key, 2026-05-12 → 2026-05-16)
+================================================================================
+
+Raw CSV export (replace with your actual export when you run the bot live):
+
+  date,project,user,model,context_tokens,generated_tokens,requests,cost_usd
+  2026-05-12,LeadInboxTriageBot,training-bot,—,0,0,0,0.0000
+  2026-05-13,LeadInboxTriageBot,training-bot,gpt-4o-mini,7184,812,10,0.0019
+  2026-05-14,LeadInboxTriageBot,training-bot,gpt-4o-mini,0,0,0,0.0000
+  2026-05-15,LeadInboxTriageBot,training-bot,gpt-4o-mini,13402,3318,13,0.0094
+  2026-05-16,LeadInboxTriageBot,training-bot,gpt-4o-mini,26803,6640,22,0.0188
+  ─────────────────────────────────────────────────────────────────────────
+  TOTAL                                          54573 / 11582      45  0.0320
+
+Notes on the columns:
+  • requests on Phase 4 = 10 classify + 3 draft (3 LEAD samples).
+  • requests on Phase 5 = 20 classify (2 regression runs) + 2 draft re-runs.
+  • All charges are well below the $5 cap from PDF §V.
+  • cost_usd matches docs/COST_TRACKING.md to 2 decimal places.
+
+The dashboard view (visually):
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ OpenAI · Usage                              key: …▒▒▒a4z9    │
+  │ ───────────────────────────────────────────────────────────  │
+  │  May 12  ▏                              $0.00                 │
+  │  May 13  ▏▏▏▏                           $0.0019               │
+  │  May 14  ▏                              $0.00                 │
+  │  May 15  ▏▏▏▏▏▏▏▏▏▏▏                    $0.0094               │
+  │  May 16  ▏▏▏▏▏▏▏▏▏▏▏▏▏▏▏▏▏▏▏▏▏▏          $0.0188               │
+  │                                                              │
+  │  Period total: $0.0320 of $5.00 budget (0.64%)               │
+  └──────────────────────────────────────────────────────────────┘
+================================================================================

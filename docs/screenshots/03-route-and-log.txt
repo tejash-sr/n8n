@@ -1,0 +1,98 @@
+================================================================================
+docs/screenshots/03-route-and-log.txt — Phase 3 canvas (ASCII rendering)
+Generated from workflows/v3-phase3.json
+================================================================================
+
+Workflow name:  LeadInboxTriageBot_GT
+Tags:           training, lead-triage, phase-3, batch-may-2026
+Node count:     31 (25 functional + 6 sticky notes)
+
+OVERVIEW (top-down)
+───────────────────
+
+  [Phase banner sticky]
+        │
+        ▼
+  Config → Watch inbox → Prompts → Clean email → Compute preview
+                                                      │
+                                                      ▼
+                                             Classify email
+                                                      │
+                                                      ▼
+                                             Parse classification
+                                                      │
+                                                      ▼
+                                          ┌─── Route by category (Switch) ─────────────────────────────────────┐
+                                          │   outputs: 0=LEAD, 1=SUPPORT, 2=SPAM, 3=OTHER, fallback=extra      │
+                                          └───┬──────────┬──────────┬──────────┬─────────────────┬────────────┘
+                                              │          │          │          │                 │
+                                       LEAD branch  SUPPORT br. SPAM br.  OTHER br.       fallback (extra)
+                                              │          │          │          │                 │
+                                              ▼          ▼          ▼          ▼                 ▼
+                                       Lookup     Lookup    Lookup    Lookup      Log unknown category
+                                       leads      support   spam      other       to errors (Sheets append)
+                                              │          │          │          │
+                                              ▼          ▼          ▼          ▼
+                                     Already in   Already   Already   Already
+                                     leads? (IF) in supp.?  in spam?  in other?
+                                       │  ╲        │ ╲       │ ╲       │ ╲
+                                       │   ╲       │  ╲      │  ╲      │  ╲    (true branch
+                                       │    ╲      │   ╲     │   ╲     │   ╲    = duplicate)
+                                       ▼     ▼     ▼    ▼    ▼    ▼    ▼    ▼
+                                Append    Dup    Apnd   Dup   Apnd  Dup   Apnd Dup
+                                leads    skipd   supp  skpd   spam  skpd   oth skpd
+                                       (leads) (sup.) (spam) (other)
+                                       Set    Set    Set    Set
+                                       node   node   node   node
+                                       writes writes writes writes
+                                       duplicate_skipped=true + skip_reason
+
+KEY NEW NODES (vs Phase 2)
+──────────────────────────
+
+  Route by category   (Switch)
+                      notes: "4 named outputs + fallback. Fallback (extra
+                              output) catches any unexpected category and
+                              routes to the errors tab — never silently
+                              drops an item."
+                      options.fallbackOutput = "extra"
+
+  Lookup <cat>        (Sheets, operation=lookup)
+                      For each of leads/support/spam/other, range=<cat>!A:A,
+                      lookup column = message_id.
+                      retryOnFail=true, maxTries=3, waitBetweenTries=5000
+
+  Already in <cat>?   (IF)
+                      Condition: $json[0].message_id is empty
+                      true  → Append <cat>
+                      false → Duplicate skipped (<cat>)
+
+  Duplicate skipped (<cat>)   (Set)
+                      notes: "Idempotency short-circuit. Emits
+                              duplicate_skipped=true and a human-readable
+                              skip_reason so the executions log explains
+                              the no-op."
+                      fields: duplicate_skipped=true,
+                              skip_reason=already_in_<cat>_tab
+
+  Append <cat>        (Sheets, operation=append)
+                      Explicit column mapping (NOT "map all fields"):
+                        leads:    message_id, received_at, sender_email,
+                                  sender_domain, subject, body_preview,
+                                  priority, confidence, status=NEW,
+                                  created_at={{$now.toISO()}}
+                        support/spam/other: similar tab-specific columns
+                      retryOnFail=true, maxTries=3, waitBetweenTries=5000
+
+  Log unknown category to errors  (Sheets append → errors tab)
+                      notes: "Switch fallback target. Captures the rare
+                              case where the LLM returns a category outside
+                              the 4 allowed enums."
+
+IDEMPOTENCY TEST
+────────────────
+Re-running the workflow on the same 10 seed emails:
+  • Each Lookup finds the prior row → returns the message_id
+  • Each IF goes to the false branch → Duplicate skipped node
+  • Zero new rows appended; zero new drafts; zero new Slack pings
+================================================================================

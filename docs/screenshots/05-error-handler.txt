@@ -1,0 +1,75 @@
+================================================================================
+docs/screenshots/05-error-handler.txt — Error Handler canvas (ASCII rendering)
+Generated from workflows/error-handler.json
+================================================================================
+
+Workflow name:  LeadInboxTriageBot_ErrorHandler_GT
+Tags:           training, lead-triage, error-handler, batch-may-2026
+Node count:     7 (5 functional + 2 sticky notes)
+
+CANVAS LAYOUT
+─────────────
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │ Section_PhaseBanner (full-width banner, red theme)                 │
+  │  ╔═══════════════════════════════════════════════════════════════╗ │
+  │  ║  📌  Error Handler · Catch-all for the main workflow          ║ │
+  │  ║       • Triggered ONLY by Error Trigger from the main flow    ║ │
+  │  ║       • Logs to errors tab + posts to #training-leads-errors  ║ │
+  │  ║       • Does NOT re-trigger the main workflow                 ║ │
+  │  ║       • Append + Slack BOTH have retryOnFail = 3×5s            ║ │
+  │  ╚═══════════════════════════════════════════════════════════════╝ │
+  │                                                                    │
+  │   ┌─────────┐    ┌─────────────────┐    ┌──────────────────┐       │
+  │   │ Config  │    │  Error Trigger  │───▶│ Build error row  │       │
+  │   │ (Set)   │    │                 │    │ (Set)            │       │
+  │   └─────────┘    └─────────────────┘    └──────────────────┘       │
+  │                                                  │                 │
+  │                                                  ├────────────┐    │
+  │                                                  ▼            ▼    │
+  │                                       ┌──────────────────┐ ┌──────────────┐
+  │                                       │ Append errors    │ │ Post error   │
+  │                                       │ row (Sheets)     │ │ alert (Slack)│
+  │                                       │ retry 3×5s       │ │ retry 3×5s   │
+  │                                       └──────────────────┘ └──────────────┘
+  └────────────────────────────────────────────────────────────────────┘
+
+DATA FLOW
+─────────
+
+  Error Trigger emits:
+    {
+      execution: {
+        id: "...",
+        error: { message: "OpenAI 503 Service Unavailable", ... },
+        lastNodeExecuted: "Classify email"
+      },
+      workflow: { id: "...", name: "LeadInboxTriageBot_GT" }
+    }
+
+  Build error row (Set) converts that into a flat row:
+    message_id     = $json.execution.data?.resultData?...?.message_id ?? ""
+    received_at    = best-effort timestamp from upstream item
+    error_stage    = $json.execution.lastNodeExecuted
+    error_message  = $json.execution.error.message.slice(0, 500)   (was 280)
+    raw_payload    = JSON.stringify($json).slice(0, 1000)
+    created_at     = $now.toISO()
+    status         = "OPEN"
+
+  Append errors row writes that row to the CRM Sheet, errors tab.
+  Post error alert posts a brief Slack message with the same fields.
+
+SIMULATED FAILURE TEST (PDF §5 acceptance)
+──────────────────────────────────────────
+  1. Set OpenAI credential to a bogus key.
+  2. Re-send sample_01_lead_rfp.eml → workflow fails at Classify email.
+  3. Error Trigger fires automatically.
+  4. Sheet's errors tab gets a new OPEN row (~5s later).
+  5. Slack #training-leads-errors gets a posted alert.
+  6. The main workflow does NOT auto-retry the original execution.
+
+The retry-on-failure on Append/Slack here is what saves you when, e.g.,
+the error storm itself temporarily pushes Sheets past its 60 writes/min
+quota — without retry the error trail would be lost exactly when you
+need it most.
+================================================================================

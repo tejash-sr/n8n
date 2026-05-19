@@ -1,0 +1,96 @@
+================================================================================
+docs/screenshots/06-full-canvas.txt — Phase 5 final full canvas (ASCII)
+Generated from workflows/v5-phase5-final.json
+================================================================================
+
+Workflow name:  LeadInboxTriageBot_GT
+Tags:           training, lead-triage, phase-5, final, batch-may-2026
+Node count:     37 (29 functional + 8 sticky notes)
+settings.errorWorkflow → LeadInboxTriageBot_ErrorHandler_GT
+
+EIGHT STICKY-NOTE SECTIONS, IN READING ORDER
+────────────────────────────────────────────
+
+  1. Section_PhaseBanner      (grey, 1180×160, top of canvas)
+        Big "Phase 5 · Final Hardening & Error Handling" banner.
+  2. Section_Trigger          (yellow)
+        Where the Watch inbox node lives.
+  3. Section_Preprocess       (orange)
+        Config + Prompts + Clean email + Compute preview.
+  4. Section_Classify         (blue)
+        Classify email + Parse classification.
+  5. Section_Route            (purple)
+        Route by category Switch with 4 outputs + fallback.
+  6. Section_Log              (green)
+        Per-category Lookup → IF → Append + Duplicate skipped chains × 4
+        + Log unknown category to errors (Switch fallback target).
+  7. Section_DraftNotify      (pink)
+        Draft reply → Create Gmail draft → Wait for draft id → Post lead card.
+  8. Section_Hardening        (red)
+        Retry config (3×5s) marked on every external-call node + pointer
+        to the Error Handler sub-workflow.
+
+PER-NODE STICKER (the `notes` field on every non-sticky node)
+─────────────────────────────────────────────────────────────
+Every functional node carries a one-paragraph `notes` field that names
+the node and explains its purpose — the "per-node sticker" requested in
+the user's brief. When you hover the node in the n8n UI, this text
+appears as a tooltip. Examples:
+
+  Config            → "Deployment-level switches every downstream node
+                       reads from. Keep prompts in the Prompts node,
+                       not here."
+  Prompts           → "Single source of truth for both system prompts.
+                       Edit prompts here, not inside the AI nodes."
+  Compute preview   → "Second-pass Set node. Computes body_preview from
+                       the just-computed body_clean — lives in its own
+                       node because n8n does not guarantee evaluation
+                       order of sibling fields inside a single Set node."
+  Wait for draft id → "Hand-off boundary so $node['Create Gmail draft']
+                       .json.id is populated before Slack templates it
+                       into the Open-draft-in-Gmail button."
+  Log unknown       → "Switch fallback target. Captures the rare case
+   category to errors  where the LLM returns a category outside the 4
+                       allowed enums."
+
+CONNECTIONS SUMMARY (high-level)
+────────────────────────────────
+
+  Config ─▶ Watch inbox ─▶ Prompts ─▶ Clean email ─▶ Compute preview
+                                                          │
+                                                          ▼
+                                                   Classify email
+                                                          │
+                                                          ▼
+                                                Parse classification
+                                                          │
+                                                          ▼
+                                                 Route by category
+                ┌──── LEAD ──┬─ SUPPORT ─┬── SPAM ──┬── OTHER ──┬──── fallback ────┐
+                ▼            ▼           ▼          ▼           ▼                  ▼
+          Lookup        Lookup       Lookup    Lookup     Log unknown
+          leads         support      spam      other      category to errors
+                │              │              │              │
+                ▼              ▼              ▼              ▼
+          Already in    Already in    Already in    Already in
+          leads?        support?      spam?         other?
+            │  ╲           │  ╲           │  ╲           │  ╲
+           T   F          T   F          T   F          T   F
+            │   ▼          │   ▼          │   ▼          │   ▼
+            │  Dup skp     │ Dup skp      │ Dup skp     │ Dup skp
+            ▼  (leads)     ▼ (sup.)       ▼ (spam)      ▼ (other)
+         Append           Append         Append         Append
+         leads            support        spam           other
+            │
+            ▼
+         Draft reply ─▶ Create Gmail draft ─▶ Wait for draft id ─▶ Post lead card
+
+ACCEPTANCE-CRITERIA TOUCHPOINTS (PDF §5)
+────────────────────────────────────────
+  [x] Error handler workflow wired in via settings.errorWorkflow
+  [x] Retries on every AI/Sheets/Gmail/Slack node (3×5s)
+  [x] Seed-set accuracy 9/10 = 90% (target ≥80%) — see test_fixtures.csv
+  [x] README complete, RUNBOOK has Gmail-Trigger retry caveat + PII note
+  [x] Loom script in docs/LOOM.md
+  [x] Workflow exported as v5-phase5-final.json
+================================================================================

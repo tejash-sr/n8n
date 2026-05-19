@@ -1,0 +1,64 @@
+================================================================================
+docs/screenshots/01-trigger.txt — Phase 1 canvas (ASCII rendering)
+Generated from workflows/v1-phase1.json
+================================================================================
+
+Workflow name:  LeadInboxTriageBot_GT
+Tags:           training, lead-triage, phase-1, batch-may-2026
+Node count:     6 (2 functional + 4 sticky notes)
+
+CANVAS LAYOUT (positions match workflow JSON exactly)
+─────────────────────────────────────────────────────
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ Section_PhaseBanner          (sticky, grey, 1180×160, at -200,-260) │
+  │   ╔════════════════════════════════════════════════════════════╗    │
+  │   ║   📌  Phase 1 · Workflow Foundation & Gmail Trigger        ║    │
+  │   ║       Atomic deliverable for commit feat(phase-1)          ║    │
+  │   ║       • Create LeadInboxTriageBot_GT in n8n                ║    │
+  │   ║       • Wire Gmail Trigger every 60s (markAsRead = true)   ║    │
+  │   ║       • Sticky-note section placeholders for next phases   ║    │
+  │   ╚════════════════════════════════════════════════════════════╝    │
+  │                                                                      │
+  │  [Section_Trigger]    [Section_Classify]   [Section_Route]           │
+  │   yellow sticky        blue sticky          purple sticky            │
+  │   at (-140, -40)       at (240, -40)        at (620, -40)            │
+  │                                                                      │
+  │   ┌────────────┐      ┌──────────────┐                               │
+  │   │  Config    │─────▶│ Watch inbox  │                               │
+  │   │  (Set)     │      │ (gmailTrig.) │                               │
+  │   │  -20, 100  │      │  220, 100    │                               │
+  │   └────────────┘      └──────────────┘                               │
+  │                                                                      │
+  └──────────────────────────────────────────────────────────────────────┘
+
+NODE INVENTORY
+──────────────
+
+  Config        [n8n-nodes-base.set]
+                notes: "Deployment-level switches every downstream node
+                        reads from. Keep prompts in the Prompts node,
+                        not here."
+                fields: spreadsheetId, leadsTab, supportTab, spamTab,
+                        otherTab, errorsTab, slackChannel, slackErrorChannel,
+                        signature, model, temperatureClassifier,
+                        temperatureDraft
+
+  Watch inbox   [n8n-nodes-base.gmailTrigger]
+                notes: "Polls Gmail every 60s. markAsRead=true so
+                        re-runs cannot pick the same email twice."
+                pollTimes.everyMinute, options.markAsRead=true
+
+CONNECTIONS
+───────────
+  Config  ──▶  Watch inbox
+
+PHASE-1 ACCEPTANCE CHECKS (from PDF §1)
+───────────────────────────────────────
+  [x] Workflow named LeadInboxTriageBot_GT
+  [x] Description = production-style multi-line block
+  [x] Tags = training + lead-triage + phase-1 + batch-may-2026
+  [x] Gmail Trigger polls every 1 minute
+  [x] markAsRead enabled (idempotency belt-and-braces)
+  [x] Section sticky-note placeholders in place
+================================================================================
