@@ -1,15 +1,15 @@
 {
-  "name": "LeadInboxTriageBot_Phase4",
+  "name": "LeadInboxTriageBot_GT",
   "nodes": [
     {
       "parameters": {
-        "content": "# Trigger",
+        "content": "# Phase 4 · Draft Reply Generation & Slack Notification\n## Lead Inbox Triage Bot — Grootan Internal Training (batch `batch-may-2026`)\n\n**Trainee:** `<initials = GT>`\n\n**This phase builds:** on the LEAD branch only — `Draft reply` (OpenAI, T=0.4) → `Create Gmail draft` (createDraft only — NEVER send) AND **in parallel** → `Post lead card` (Slack Block-Kit + priority-coloured attachment). A Wait node ensures the draft exists before Slack reads its id.\n\n_See `docs/PHASES.md` for the acceptance criteria for this phase._",
         "height": 160,
-        "width": 200,
-        "color": 5
+        "width": 1180,
+        "color": 7
       },
-      "id": "ad6f4fa9-b1a6-4ea8-aa7a-371140282fdb",
-      "name": "Section_# Trigger",
+      "id": "71b10cf3-8888-4efb-950e-c9197e089542",
+      "name": "Section_PhaseBanner",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -19,50 +19,82 @@
     },
     {
       "parameters": {
-        "content": "# Pre-process",
+        "content": "# 🟡 Trigger",
         "height": 160,
         "width": 200,
-        "color": 4
+        "color": 5
       },
-      "id": "1198d024-8ee1-4e6f-aa5c-3b2a604d78e3",
-      "name": "Section_# Pre-process",
+      "id": "9bdfd204-060c-46ac-8c0f-65cfa251bd39",
+      "name": "Section_Trigger",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        40,
+        400,
         220
       ]
     },
     {
       "parameters": {
-        "content": "# Classify",
+        "content": "# 🟠 Pre-process",
         "height": 160,
         "width": 200,
-        "color": 6
+        "color": 4
       },
-      "id": "48c4bd2d-b3c5-47b2-9344-bc004c28efe7",
-      "name": "Section_# Classify",
+      "id": "47520142-164f-4536-a5c6-0baf993e0fdf",
+      "name": "Section_Preprocess",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        40,
-        400
+        1000,
+        220
       ]
     },
     {
       "parameters": {
-        "content": "# Route + Log\nSwitch → per-category idempotency check → Sheets append.\nFallback output goes to the OTHER tab so unknowns don't disappear.",
-        "height": 140,
-        "width": 620,
-        "color": 2
+        "content": "# 🟦 Classify",
+        "height": 160,
+        "width": 200,
+        "color": 6
       },
-      "id": "d4062625-cb8c-4b7e-a869-8e33402ac6a7",
-      "name": "Section_# Route + Log",
+      "id": "962bf233-6e5f-47b3-a7a7-e23342a5280c",
+      "name": "Section_Classify",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        40,
-        580
+        1700,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 🟢 Route\nSwitch by category. Fallback → 'Log unknown category to errors'.",
+        "height": 160,
+        "width": 320,
+        "color": 2
+      },
+      "id": "49ec7db0-a536-4168-bd00-ca2caf790d72",
+      "name": "Section_Route",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2300,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# 🔴 Log\nLookup → IF → Append per category, with explicit columns.\nDuplicate path emits a `duplicate_skipped=true` Set marker (PDF §3.4).",
+        "height": 140,
+        "width": 620,
+        "color": 3
+      },
+      "id": "9aaa01b5-d5c6-47fb-86cd-38115122e831",
+      "name": "Section_Log",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2700,
+        220
       ]
     },
     {
@@ -70,66 +102,60 @@
         "assignments": {
           "assignments": [
             {
-              "id": "da085b47-c26e-400a-837c-7043ac830cd5",
+              "id": "dde359a3-7583-4ae5-8b5f-418dedc76690",
               "name": "spreadsheetId",
               "type": "string",
               "value": "REPLACE_WITH_YOUR_GOOGLE_SHEET_ID"
             },
             {
-              "id": "a84890b4-6a11-4da6-bd9f-24a835518d33",
+              "id": "9fa0e573-9385-4ac2-b052-8be8ec4d5b6a",
               "name": "slackChannel",
               "type": "string",
               "value": "#training-leads"
             },
             {
-              "id": "6d472b1e-c0b4-4331-91d9-2a39ace27e30",
+              "id": "b0dd9280-5f24-42ed-82e3-a9b92ee668ab",
               "name": "slackErrorChannel",
               "type": "string",
               "value": "#training-leads-errors"
             },
             {
-              "id": "3731238d-63c6-4155-91b1-888c4f63238a",
+              "id": "62b97193-58f7-4c0a-ba83-2df2e838ad8a",
               "name": "model",
               "type": "string",
               "value": "gpt-4o-mini"
             },
             {
-              "id": "4b4fb313-29df-45aa-bab1-dce9e0080279",
+              "id": "a5c42c50-df2e-49c0-920c-788163be2896",
               "name": "temperature",
               "type": "number",
               "value": 0.1
             },
             {
-              "id": "82c8a1e8-2b1e-4d06-8671-2d4d60021992",
+              "id": "5c914f90-0f8a-4a5f-9039-05de0d9bda7f",
               "name": "signature",
               "type": "string",
               "value": "— Grootan Team\n+91-44-XXXX-XXXX | grootan.com"
             },
             {
-              "id": "b9b74a67-1bb9-4846-8946-7ea2a9010a5b",
-              "name": "classification_system_prompt",
+              "id": "82028b18-a744-49d2-a687-259da1ff4d72",
+              "name": "batch",
               "type": "string",
-              "value": "You are a strict, deterministic email triage assistant for Grootan Technologies'\nshared sales inbox. Your only job is to classify ONE incoming email into exactly\none of four categories and return a JSON object — nothing else, no prose, no\nmarkdown fences, no commentary.\n\n## Categories\n- LEAD     — a prospective customer (or someone on their behalf) asking about\n            Grootan's services, requesting a quote/RFP, asking for a demo, or\n            otherwise initiating a sales conversation. The sender is NOT already\n            an active customer asking for help with an existing product.\n- SUPPORT  — an existing customer (or someone using one of Grootan's products)\n            reporting a bug, asking a how-to question, or asking for help with\n            something they already use.\n- SPAM     — unsolicited marketing, newsletters, cold outreach with no clear\n            relationship to Grootan's offering, SEO link-building, list-bombing,\n            \"I can rank your site\" / \"I can build your app for $5/hr\" pitches,\n            promotional discounts, generic mass campaigns.\n- OTHER    — internal forwards, automated notifications (calendar invites,\n            receipts, system alerts), bounces, anything that doesn't fit the\n            three categories above.\n\n## Output schema (return EXACTLY this shape)\n{\n  \"category\":           \"LEAD\" | \"SUPPORT\" | \"SPAM\" | \"OTHER\",\n  \"confidence\":         <number between 0.0 and 1.0>,\n  \"reasoning\":          \"<one sentence, ≤ 240 chars, explaining the call>\",\n  \"suggested_priority\": \"LOW\" | \"MEDIUM\" | \"HIGH\"   // ONLY when category=LEAD; null otherwise\n}\n\n## Priority rubric (LEAD only)\n- HIGH   — explicit budget/timeline, named decision-maker title, or named\n           competitor evaluation. Examples: \"we need this rolled out by Q3\",\n           \"I'm the CTO and we're choosing between X and you\", \"RFP attached\".\n- MEDIUM — clear interest with some specifics (team size, use case) but no\n           hard timeline or budget.\n- LOW    — vague interest (\"interested in your services\") with no specifics.\n\n## Hard rules\n1. Output MUST be valid JSON parseable by JSON.parse. No code fences. No\n   leading or trailing text. No keys other than the four above.\n2. confidence is a float between 0 and 1. If you would say \"I'm not sure\",\n   use 0.55–0.7. Reserve 0.9+ for unambiguous cases.\n3. If sender_domain is a free webmail (gmail.com, outlook.com, yahoo.com) AND\n   the email lacks specifics, this is rarely a real LEAD — bias toward LOW\n   priority or OTHER.\n4. Newsletters with \"view in browser\", \"unsubscribe\", or \"list-unsubscribe\"\n   markers are SPAM, not LEAD, even if the topic is relevant.\n5. A reply chain pasted in the body does NOT change the classification — judge\n   only the most recent message (the cleaned body you receive will already\n   have quotes stripped).\n\n## Few-shot examples\n\n### Example 1 — LEAD (HIGH)\nSubject: Quote for Q3 rollout — 200 ops team\nBody:    Hi Grootan, we're evaluating workflow vendors for our 200-person ops\n         team. Need automation for ticket triage, ETA decision by July. Can we\n         schedule a 30-min call this week? CTO will join.\nOutput:\n{\"category\":\"LEAD\",\"confidence\":0.95,\"reasoning\":\"Named decision-maker, team size, hard timeline, asks for call.\",\"suggested_priority\":\"HIGH\"}\n\n### Example 2 — SPAM\nSubject: 🚀 Boost your rankings — 50% OFF this week!\nBody:    Hi there, our SEO agency can rank your site #1 on Google in 30 days.\n         100% guaranteed. Click here for a free audit. Unsubscribe at the\n         bottom.\nOutput:\n{\"category\":\"SPAM\",\"confidence\":0.99,\"reasoning\":\"Generic SEO pitch with discount hook and unsubscribe footer.\",\"suggested_priority\":null}"
-            },
-            {
-              "id": "95fce865-50c0-4a3e-904c-21b9f08a9771",
-              "name": "reply_system_prompt",
-              "type": "string",
-              "value": "You are drafting a reply from a Grootan Technologies sales rep to an inbound\nprospect. Your reply will be saved as a Gmail DRAFT for a human to review and\nedit — it will NOT be sent automatically. Optimise for tone and accuracy; the\nhuman is your safety net for facts but not for tone.\n\n## Hard constraints\n- Length: 80–150 words. Count words; do not exceed 150 or fall below 80.\n- Address the sender by first name only. If only an email is available, use a\n  warm but neutral opener (\"Hi there,\") rather than guessing a name.\n- Match Grootan's tone: warm, professional, concise. No exclamation marks,\n  no superlatives (\"absolutely thrilled\", \"amazing\"), no emoji.\n- Do NOT quote pricing, discounts, or specific SLAs. If the prospect asks for\n  pricing, say a rep will share an indicative range on the call.\n- Do NOT invent facts about the sender's company, headcount, tech stack, or\n  industry beyond what the email itself states. If the email is thin on\n  context, ASK 1–2 clarifying questions instead of fabricating.\n- Always propose a concrete next step: a 20-minute discovery call. Ask for\n  2–3 time-slot options from the sender (do not propose specific times — we\n  do not have their calendar).\n- End with the exact signature block provided in the user message under\n  \"signature\". Do not modify the signature.\n\n## Output format\nPlain text. No subject line (the workflow sets it). No greeting decorations.\nNo closing flourish before the signature. Just: greeting → body → call to\naction → signature.\n\n## Few-shot — thin context\nUser input:\n{\n  \"name\": \"Alex\",\n  \"domain\": \"gmail.com\",\n  \"priority\": \"LOW\",\n  \"body\": \"Hi, interested in your services. Pls share details.\",\n  \"signature\": \"— Grootan Team\\n+91-44-XXXX-XXXX | grootan.com\"\n}\nOutput:\nHi Alex,\n\nThanks for reaching out — happy to share more about what we do. To make the\nnext conversation useful, could you tell me a bit about what you're trying\nto solve and the size of the team involved? That way I can point to the\nmost relevant case studies rather than sending a generic overview.\n\nWould a 20-minute discovery call work? If yes, please send 2–3 time slots\nthat suit you and I'll lock one in.\n\n— Grootan Team\n+91-44-XXXX-XXXX | grootan.com\n\n## Few-shot — rich context\nUser input:\n{\n  \"name\": \"Priya\",\n  \"domain\": \"acme.com\",\n  \"priority\": \"HIGH\",\n  \"body\": \"We're a 200-person ops team evaluating workflow vendors. Need ticket triage automation by Q3. CTO will join the call.\",\n  \"signature\": \"— Grootan Team\\n+91-44-XXXX-XXXX | grootan.com\"\n}\nOutput:\nHi Priya,\n\nThanks for the detail — a 200-person ops team with a Q3 target gives us a\nclear starting point. We've shipped ticket-triage automations for teams of\nsimilar size and can walk through the rough architecture, integration\npoints with your existing tools, and a realistic rollout plan on the call.\n\nA 20-minute discovery slot with your CTO works well for kickoff. Could you\nshare 2–3 time slots over the next week and I'll confirm one back?\n\n— Grootan Team\n+91-44-XXXX-XXXX | grootan.com"
+              "value": "batch-may-2026"
             }
           ]
         },
         "options": {}
       },
-      "id": "ac1842a7-e049-4784-bfba-f8e5420b0281",
+      "id": "80492e90-2374-4a38-94c3-349e4f9d674d",
       "name": "Config",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
       "position": [
         400,
-        280
+        460
       ],
-      "notes": "Edit this node to point at YOUR spreadsheet / Slack channel / signature.\nAll downstream nodes read from here so re-targeting is one place.",
+      "notes": "Tenant-style settings. Point spreadsheetId / Slack channels / model / signature here. Prompts live in the separate 'Prompts' Set node.",
       "notesInFlow": true
     },
     {
@@ -149,16 +175,17 @@
           "readStatus": "unread"
         },
         "options": {
-          "downloadAttachments": false
+          "downloadAttachments": false,
+          "markAsRead": true
         }
       },
-      "id": "18c4539a-18c1-411d-a5cc-514c93c05595",
+      "id": "090b9d9f-d17d-4a2a-a571-968a57ab1c9c",
       "name": "Watch inbox",
       "type": "n8n-nodes-base.gmailTrigger",
       "typeVersion": 1,
       "position": [
         400,
-        80
+        280
       ],
       "credentials": {
         "gmailOAuth2": {
@@ -166,7 +193,7 @@
           "name": "Gmail - Triage Training"
         }
       },
-      "notes": "Polls every 1 minute. Marks emails as read so they aren't reprocessed.",
+      "notes": "Polls INBOX every 1 minute. options.markAsRead=true so the same email is not re-processed on retry. continueOnFail=false; Gmail Triggers do not support n8n-level retries (see RUNBOOK §3).",
       "notesInFlow": true
     },
     {
@@ -174,64 +201,89 @@
         "assignments": {
           "assignments": [
             {
-              "id": "0d6236f6-c474-4d84-a098-2ecb6a8a2a43",
+              "id": "77f6e9b5-1902-408f-a901-8dee74053162",
+              "name": "classification_system_prompt",
+              "type": "string",
+              "value": "You are a strict, deterministic email triage assistant for Grootan Technologies'\nshared sales inbox. Your only job is to classify ONE incoming email into exactly\none of four categories and return a JSON object — nothing else, no prose, no\nmarkdown fences, no commentary.\n\n## Categories\n- LEAD     — a prospective customer (or someone on their behalf) asking about\n            Grootan's services, requesting a quote/RFP, asking for a demo, or\n            otherwise initiating a sales conversation. The sender is NOT already\n            an active customer asking for help with an existing product.\n- SUPPORT  — an existing customer (or someone using one of Grootan's products)\n            reporting a bug, asking a how-to question, or asking for help with\n            something they already use.\n- SPAM     — unsolicited marketing, newsletters, cold outreach with no clear\n            relationship to Grootan's offering, SEO link-building, list-bombing,\n            \"I can rank your site\" / \"I can build your app for $5/hr\" pitches,\n            promotional discounts, generic mass campaigns.\n- OTHER    — internal forwards, automated notifications (calendar invites,\n            receipts, system alerts), bounces, anything that doesn't fit the\n            three categories above.\n\n## Output schema (return EXACTLY this shape)\n{\n  \"category\":           \"LEAD\" | \"SUPPORT\" | \"SPAM\" | \"OTHER\",\n  \"confidence\":         <number between 0.0 and 1.0>,\n  \"reasoning\":          \"<one sentence, ≤ 240 chars, explaining the call>\",\n  \"suggested_priority\": \"LOW\" | \"MEDIUM\" | \"HIGH\"   // ONLY when category=LEAD; null otherwise\n}\n\n## Priority rubric (LEAD only)\n- HIGH   — explicit budget/timeline, named decision-maker title, or named\n           competitor evaluation. Examples: \"we need this rolled out by Q3\",\n           \"I'm the CTO and we're choosing between X and you\", \"RFP attached\".\n- MEDIUM — clear interest with some specifics (team size, use case) but no\n           hard timeline or budget.\n- LOW    — vague interest (\"interested in your services\") with no specifics.\n\n## Hard rules\n1. Output MUST be valid JSON parseable by JSON.parse. No code fences. No\n   leading or trailing text. No keys other than the four above.\n2. confidence is a float between 0 and 1. If you would say \"I'm not sure\",\n   use 0.55–0.7. Reserve 0.9+ for unambiguous cases.\n3. If sender_domain is a free webmail (gmail.com, outlook.com, yahoo.com) AND\n   the email lacks specifics, this is rarely a real LEAD — bias toward LOW\n   priority or OTHER.\n4. Newsletters with \"view in browser\", \"unsubscribe\", or \"list-unsubscribe\"\n   markers are SPAM, not LEAD, even if the topic is relevant.\n5. A reply chain pasted in the body does NOT change the classification — judge\n   only the most recent message (the cleaned body you receive will already\n   have quotes stripped).\n\n## Few-shot examples\n\n### Example 1 — LEAD (HIGH)\nSubject: Quote for Q3 rollout — 200 ops team\nBody:    Hi Grootan, we're evaluating workflow vendors for our 200-person ops\n         team. Need automation for ticket triage, ETA decision by July. Can we\n         schedule a 30-min call this week? CTO will join.\nOutput:\n{\"category\":\"LEAD\",\"confidence\":0.95,\"reasoning\":\"Named decision-maker, team size, hard timeline, asks for call.\",\"suggested_priority\":\"HIGH\"}\n\n### Example 2 — SPAM\nSubject: 🚀 Boost your rankings — 50% OFF this week!\nBody:    Hi there, our SEO agency can rank your site #1 on Google in 30 days.\n         100% guaranteed. Click here for a free audit. Unsubscribe at the\n         bottom.\nOutput:\n{\"category\":\"SPAM\",\"confidence\":0.99,\"reasoning\":\"Generic SEO pitch with discount hook and unsubscribe footer.\",\"suggested_priority\":null}"
+            },
+            {
+              "id": "03964047-2177-4f4a-9900-4c62502b55fd",
+              "name": "reply_system_prompt",
+              "type": "string",
+              "value": "You are drafting a reply from a Grootan Technologies sales rep to an inbound\nprospect. Your reply will be saved as a Gmail DRAFT for a human to review and\nedit — it will NOT be sent automatically. Optimise for tone and accuracy; the\nhuman is your safety net for facts but not for tone.\n\n## Hard constraints\n- Length: 80–150 words. Count words; do not exceed 150 or fall below 80.\n- Address the sender by first name only. If only an email is available, use a\n  warm but neutral opener (\"Hi there,\") rather than guessing a name.\n- Match Grootan's tone: warm, professional, concise. No exclamation marks,\n  no superlatives (\"absolutely thrilled\", \"amazing\"), no emoji.\n- Do NOT quote pricing, discounts, or specific SLAs. If the prospect asks for\n  pricing, say a rep will share an indicative range on the call.\n- Do NOT invent facts about the sender's company, headcount, tech stack, or\n  industry beyond what the email itself states. If the email is thin on\n  context, ASK 1–2 clarifying questions instead of fabricating.\n- Always propose a concrete next step: a 20-minute discovery call. Ask for\n  2–3 time-slot options from the sender (do not propose specific times — we\n  do not have their calendar).\n- End with the exact signature block provided in the user message under\n  \"signature\". Do not modify the signature.\n\n## Output format\nPlain text. No subject line (the workflow sets it). No greeting decorations.\nNo closing flourish before the signature. Just: greeting → body → call to\naction → signature.\n\n## Few-shot — thin context\nUser input:\n{\n  \"name\": \"Alex\",\n  \"domain\": \"gmail.com\",\n  \"priority\": \"LOW\",\n  \"body\": \"Hi, interested in your services. Pls share details.\",\n  \"signature\": \"— Grootan Team\\n+91-44-XXXX-XXXX | grootan.com\"\n}\nOutput:\nHi Alex,\n\nThanks for reaching out — happy to share more about what we do. To make the\nnext conversation useful, could you tell me a bit about what you're trying\nto solve and the size of the team involved? That way I can point to the\nmost relevant case studies rather than sending a generic overview.\n\nWould a 20-minute discovery call work? If yes, please send 2–3 time slots\nthat suit you and I'll lock one in.\n\n— Grootan Team\n+91-44-XXXX-XXXX | grootan.com\n\n## Few-shot — rich context\nUser input:\n{\n  \"name\": \"Priya\",\n  \"domain\": \"acme.com\",\n  \"priority\": \"HIGH\",\n  \"body\": \"We're a 200-person ops team evaluating workflow vendors. Need ticket triage automation by Q3. CTO will join the call.\",\n  \"signature\": \"— Grootan Team\\n+91-44-XXXX-XXXX | grootan.com\"\n}\nOutput:\nHi Priya,\n\nThanks for the detail — a 200-person ops team with a Q3 target gives us a\nclear starting point. We've shipped ticket-triage automations for teams of\nsimilar size and can walk through the rough architecture, integration\npoints with your existing tools, and a realistic rollout plan on the call.\n\nA 20-minute discovery slot with your CTO works well for kickoff. Could you\nshare 2–3 time slots over the next week and I'll confirm one back?\n\n— Grootan Team\n+91-44-XXXX-XXXX | grootan.com"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c96600b1-cc6c-4b53-a839-b0df83474450",
+      "name": "Prompts",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        700,
+        580
+      ],
+      "notes": "Centralized prompts. Edit here to change classifier or reply behaviour without opening the AI nodes.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8fd372aa-c53c-41c5-a7ec-4ad27ed2141e",
               "name": "message_id",
               "type": "string",
               "value": "={{ $json.id || $json.messageId }}"
             },
             {
-              "id": "c9558e09-eb25-4f51-adad-4799e05c53db",
+              "id": "4085ea51-37ea-47cb-9062-f1241269c0db",
               "name": "thread_id",
               "type": "string",
               "value": "={{ $json.threadId }}"
             },
             {
-              "id": "024b230b-5a10-4f57-ab04-fbd092a1e8c9",
+              "id": "6e34cee9-b857-4d3a-b523-68dfa90abe5d",
               "name": "received_at",
               "type": "string",
               "value": "={{ $json.internalDate ? new Date(parseInt($json.internalDate)).toISOString() : ($json.headers?.date ? new Date($json.headers.date).toISOString() : $now.toISO()) }}"
             },
             {
-              "id": "10e453c5-deb0-445b-9a34-65cba5b37836",
+              "id": "fc59a13d-5826-4e69-b8ec-9410ffbab448",
               "name": "from_raw",
               "type": "string",
               "value": "={{ $json.from?.value?.[0]?.address ? `${$json.from.value[0].name || ''} <${$json.from.value[0].address}>` : ($json.from || $json.headers?.from || '') }}"
             },
             {
-              "id": "61d52f91-bef1-4a32-8330-8aae6ffa2470",
+              "id": "28c8df5c-49ac-4d0e-9b49-4c79f6489873",
               "name": "sender_email",
               "type": "string",
               "value": "={{ (($json.from?.value?.[0]?.address) || (($json.from || $json.headers?.from || '').match(/<([^>]+)>/)?.[1]) || ($json.from || '').trim()).toLowerCase() }}"
             },
             {
-              "id": "fe2b96b6-f75c-4b3c-9727-649e41068a84",
+              "id": "79aa774d-6d75-4134-958c-02dfdecad157",
               "name": "sender_name",
               "type": "string",
               "value": "={{ $json.from?.value?.[0]?.name?.trim() || (($json.from || $json.headers?.from || '').match(/^(.*?)\\s*<[^>]+>$/)?.[1]?.replace(/['\"]/g,'').trim()) || (($json.from || '').split('@')[0]) }}"
             },
             {
-              "id": "31b83915-3eb8-45d2-9e23-b37848038ada",
+              "id": "329096c3-acdc-41b2-9263-a3e5c962e3a4",
               "name": "sender_domain",
               "type": "string",
               "value": "={{ (($json.from?.value?.[0]?.address) || (($json.from || $json.headers?.from || '').match(/<([^>]+)>/)?.[1]) || ($json.from || '')).split('@')[1]?.toLowerCase()?.trim() }}"
             },
             {
-              "id": "2d2ee7e7-f090-45df-9a33-21150cf3979b",
+              "id": "39f18b27-bbb0-4654-9388-b813b1bb9d02",
               "name": "subject_clean",
               "type": "string",
               "value": "={{ ($json.subject || '').replace(/^\\s*(Re:|RE:|Fwd:|FW:|Fw:)\\s*/gi, '').trim() }}"
             },
             {
-              "id": "2b0ccae6-0f20-4da6-9abd-294f5f47208c",
+              "id": "a48ca47b-d8e5-4690-8de6-8d5018771cab",
               "name": "body_clean",
               "type": "string",
               "value": "={{ (($json.text || $json.body || $json.snippet || '')\n  .replace(/On\\s+.+?wrote:[\\s\\S]*$/m, '')\n  .replace(/-----Original Message-----[\\s\\S]*$/m, '')\n  .replace(/\\n--\\s*\\n[\\s\\S]*$/m, '')\n  .replace(/\\n_{2,}\\n[\\s\\S]*$/m, '')\n  .trim()) }}"
-            },
-            {
-              "id": "8c7fafef-5c43-4e6d-9429-50971a0c5965",
-              "name": "body_preview",
-              "type": "string",
-              "value": "={{ ($json.text || $json.body || $json.snippet || '').slice(0, 500) }}"
             }
           ]
         },
@@ -239,15 +291,42 @@
           "include": "all"
         }
       },
-      "id": "8cc0699b-f6be-4a1c-afe6-8ea1d7c8ae7c",
+      "id": "4d2bb12a-0b90-46c3-9af1-7433a9c04057",
       "name": "Clean email",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
       "position": [
-        700,
-        80
+        1000,
+        320
       ],
-      "notes": "Strips Re:/Fwd: from subject, removes quoted reply chains, RFC 3676 signatures, and extracts sender_name / sender_domain.",
+      "notes": "Strips Re:/Fwd: from subject, removes quoted replies, RFC 3676 signatures, and extracts sender_name / sender_email / sender_domain.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3b5a33f-f1a3-49ef-b680-d995793cdb5f",
+              "name": "body_preview",
+              "type": "string",
+              "value": "={{ ($json.body_clean || '').slice(0, 500) }}"
+            }
+          ]
+        },
+        "options": {
+          "include": "all"
+        }
+      },
+      "id": "5b47b962-b368-48e6-933a-57e090cfa780",
+      "name": "Compute preview",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        1300,
+        320
+      ],
+      "notes": "Two-pass body_preview: takes the first 500 chars of body_clean from the previous Set node. Fixes the bug where preview leaked quoted replies and signatures.",
       "notesInFlow": true
     },
     {
@@ -263,11 +342,11 @@
           "values": [
             {
               "role": "system",
-              "content": "={{ $node[\"Config\"].json.classification_system_prompt }}"
+              "content": "={{ $node[\"Prompts\"].json.classification_system_prompt }}"
             },
             {
               "role": "user",
-              "content": "=Subject: {{ ($json.subject_clean || '').slice(0, 200) }}\n\nFrom: {{ ($json.sender_email || '').slice(0, 254) }} (domain: {{ ($json.sender_domain || '').slice(0, 100) }})\n\nBody:\n{{ ($json.body_clean || '').slice(0, 2000) }}"
+              "content": "=Subject: {{ ($json.subject_clean || '').slice(0, 200) }}\n\nFrom: {{ ($json.sender_email || '').slice(0, 120) }} (domain: {{ ($json.sender_domain || '').slice(0, 120) }})\n\nBody:\n{{ ($json.body_clean || '').slice(0, 2000) }}"
             }
           ]
         },
@@ -277,13 +356,13 @@
           "responseFormat": "json_object"
         }
       },
-      "id": "6e8c7b08-a250-43c9-adbc-50f4f2a2e46c",
+      "id": "c1d7bf0e-1719-4a6f-8205-a13252ba57f8",
       "name": "Classify email",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.6,
       "position": [
-        1000,
-        80
+        1700,
+        320
       ],
       "credentials": {
         "openAiApi": {
@@ -294,22 +373,22 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
-      "notes": "JSON mode, temperature 0.1, model and prompt read from Config.",
+      "notes": "JSON mode, temperature 0.1, model from Config, prompt from the separate 'Prompts' Set node.",
       "notesInFlow": true
     },
     {
       "parameters": {
-        "functionCode": "// Safety net: NEVER throw. Always emit a valid {category, confidence, reasoning,\n// suggested_priority, parse_failed} object so downstream Switch never crashes.\nconst ALLOWED = ['LEAD','SUPPORT','SPAM','OTHER'];\nconst PRIOS   = ['LOW','MEDIUM','HIGH'];\n\nreturn items.map(item => {\n  const upstream = item.json;\n  // The AI node returns the assistant message under .message.content (chat)\n  // or under .text / .output depending on n8n version. Try a few shapes.\n  let raw = upstream.message?.content\n         ?? upstream.content\n         ?? upstream.text\n         ?? upstream.output\n         ?? upstream.choices?.[0]?.message?.content\n         ?? '';\n  if (typeof raw !== 'string') raw = JSON.stringify(raw);\n\n  let parsed = {};\n  try { parsed = JSON.parse(raw); } catch { /* leave parsed = {} */ }\n\n  const category = ALLOWED.includes(parsed.category) ? parsed.category : 'OTHER';\n  let confidence = Number(parsed.confidence);\n  if (!Number.isFinite(confidence)) confidence = 0.0;\n  confidence = Math.max(0, Math.min(1, confidence));\n  const reasoning = String(parsed.reasoning || '').slice(0, 280);\n  let suggested_priority = null;\n  if (category === 'LEAD') {\n    suggested_priority = PRIOS.includes(parsed.suggested_priority)\n      ? parsed.suggested_priority\n      : 'MEDIUM';\n  }\n  const parse_failed = !raw || !parsed.category;\n\n  // Carry forward the cleaned email fields so downstream nodes don't need to\n  // re-resolve them. We pull them via $('Clean email') in n8n, but copying is\n  // safer for the Function-node output shape.\n  const carry = $('Clean email').item?.json || {};\n\n  return {\n    json: {\n      ...carry,\n      category,\n      confidence,\n      reasoning,\n      suggested_priority,\n      parse_failed,\n      raw_ai_output: raw.slice(0, 1000),\n    }\n  };\n});\n"
+        "functionCode": "// Safety net: NEVER throw. Always emit a valid {category, confidence, reasoning,\n// suggested_priority, parse_failed} object so downstream Switch never crashes.\nconst ALLOWED = ['LEAD','SUPPORT','SPAM','OTHER'];\nconst PRIOS   = ['LOW','MEDIUM','HIGH'];\n\nreturn items.map(item => {\n  const upstream = item.json;\n  let raw = upstream.message?.content\n         ?? upstream.content\n         ?? upstream.text\n         ?? upstream.output\n         ?? upstream.choices?.[0]?.message?.content\n         ?? '';\n  if (typeof raw !== 'string') raw = JSON.stringify(raw);\n\n  let parsed = {};\n  try { parsed = JSON.parse(raw); } catch { /* leave parsed = {} */ }\n\n  const category = ALLOWED.includes(parsed.category) ? parsed.category : 'OTHER';\n  let confidence = Number(parsed.confidence);\n  if (!Number.isFinite(confidence)) confidence = 0.0;\n  confidence = Math.max(0, Math.min(1, confidence));\n  const reasoning = String(parsed.reasoning || '').slice(0, 280);\n  let suggested_priority = null;\n  if (category === 'LEAD') {\n    suggested_priority = PRIOS.includes(parsed.suggested_priority)\n      ? parsed.suggested_priority\n      : 'MEDIUM';\n  }\n  const parse_failed = !raw || !parsed.category;\n\n  // Carry the already-cleaned email fields forward. We pull from 'Compute preview'\n  // (the most-downstream pre-processing node) so body_preview is included.\n  const carry = $('Compute preview').item?.json || $('Clean email').item?.json || {};\n\n  return {\n    json: {\n      ...carry,\n      category,\n      confidence,\n      reasoning,\n      suggested_priority,\n      parse_failed,\n      raw_ai_output: raw.slice(0, 1000),\n    }\n  };\n});\n"
       },
-      "id": "142afbb7-f450-4a3e-8a8f-a822db536188",
+      "id": "c5c80c9c-d7aa-427b-803e-6d319972ca57",
       "name": "Parse classification",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        1300,
-        80
+        2000,
+        320
       ],
-      "notes": "Safety net — guarantees one of LEAD/SUPPORT/SPAM/OTHER on 100% of inputs, even when the model returns prose or invalid JSON.",
+      "notes": "Safety net — guarantees one of LEAD/SUPPORT/SPAM/OTHER on 100% of inputs. Carries cleaned fields forward incl. body_preview.",
       "notesInFlow": true
     },
     {
@@ -325,7 +404,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "a46d1e70-9b02-4b37-a13d-4ebc7c307c49",
+                    "id": "f75897b0-699d-4ef4-b93d-3d46b5329af6",
                     "leftValue": "={{ $json.category }}",
                     "rightValue": "LEAD",
                     "operator": {
@@ -348,7 +427,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "bbe9be7f-d6e9-44f5-bab7-e685dfb48a90",
+                    "id": "23ba8859-b65f-404d-8b7c-3e40c1826d51",
                     "leftValue": "={{ $json.category }}",
                     "rightValue": "SUPPORT",
                     "operator": {
@@ -371,7 +450,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "b20cff34-453e-422f-9b85-56a9dd738157",
+                    "id": "c7bc4db1-656f-4cab-9085-9194ebe1b13b",
                     "leftValue": "={{ $json.category }}",
                     "rightValue": "SPAM",
                     "operator": {
@@ -394,7 +473,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "868fa4ba-bf92-48a4-9458-d6cbb348172d",
+                    "id": "dc3d3a3b-aa62-4f1a-bfa1-44113b2609a4",
                     "leftValue": "={{ $json.category }}",
                     "rightValue": "OTHER",
                     "operator": {
@@ -415,15 +494,15 @@
           "renameFallbackOutput": "Unknown"
         }
       },
-      "id": "4cf906cc-9c0f-4976-bf29-e83a2b9fa2bb",
+      "id": "794d27c6-e070-4579-a417-ddf644bc6237",
       "name": "Route by category",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
       "position": [
-        1600,
-        80
+        2300,
+        320
       ],
-      "notes": "Routes on $json.category. Fallback output (index 4) goes to the errors path so unknown categories don't silently disappear.",
+      "notes": "Routes on $json.category. Fallback output (index 4) routes to the 'Log unknown category' path that writes the errors tab — per PDF §3.2.",
       "notesInFlow": true
     },
     {
@@ -453,12 +532,12 @@
           "returnFirstMatch": true
         }
       },
-      "id": "6cf0878b-126f-40fe-b360-fa3d9c7bdb57",
+      "id": "2afed402-d58f-42cd-aba5-6f7e57424e1a",
       "name": "Lookup leads",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
       "position": [
-        1900,
+        2700,
         -180
       ],
       "credentials": {
@@ -471,7 +550,7 @@
       "maxTries": 3,
       "waitBetweenTries": 5000,
       "continueOnFail": true,
-      "notes": "Reads existing message_ids from the 'leads' tab so we don't insert duplicates.",
+      "notes": "Reads existing message_ids from 'leads' so we don't insert duplicates.",
       "notesInFlow": true
     },
     {
@@ -484,7 +563,7 @@
           },
           "conditions": [
             {
-              "id": "ada38007-3d5a-4e26-a1b6-10355aa6a4bf",
+              "id": "a18e8e1a-d82c-48d0-9af2-ee1ec2271971",
               "leftValue": "={{ $json.message_id ? $json.message_id : '' }}",
               "rightValue": "",
               "operator": {
@@ -496,15 +575,54 @@
           "combinator": "and"
         }
       },
-      "id": "382edd11-c267-4ead-95de-3472623eff19",
+      "id": "eb8d5ca5-1aba-4934-b8d8-24c5b875d48a",
       "name": "Already in leads?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        2160,
+        2960,
         -180
       ],
-      "notes": "Short-circuits with duplicate_skipped=true if lookup found this message_id.",
+      "notes": "Output 0 (TRUE) = duplicate, SKIP append.\nOutput 1 (FALSE) = new message, proceed to append.\nCondition: $json.message_id is non-empty (lookup returned a row).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9df8e682-fbfa-4459-a068-6670c6d15802",
+              "name": "duplicate_skipped",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "35efc040-6219-4c11-8f22-41df3214b86d",
+              "name": "duplicate_tab",
+              "type": "string",
+              "value": "leads"
+            },
+            {
+              "id": "7a24a291-334a-4c82-a789-fa528f14eee2",
+              "name": "message_id",
+              "type": "string",
+              "value": "={{ $json.message_id }}"
+            }
+          ]
+        },
+        "options": {
+          "include": "all"
+        }
+      },
+      "id": "3d95526b-22bc-47c1-9217-2ba9e8df528d",
+      "name": "Duplicate skipped (leads)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        3200,
+        -260
+      ],
+      "notes": "PDF §3.4: short-circuit with duplicate_skipped=true for leads.",
       "notesInFlow": true
     },
     {
@@ -540,13 +658,13 @@
         },
         "options": {}
       },
-      "id": "2ea0d99c-e53d-424d-8f8b-7538d522de45",
+      "id": "cd6ff5b0-aa14-46e5-9ae3-56c3cfc5e72f",
       "name": "Append leads",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
       "position": [
-        2420,
-        -240
+        3200,
+        -100
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -557,7 +675,7 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
-      "notes": "Explicit column mapping per docs/sheets/CRM_SHEET_TEMPLATE.md.",
+      "notes": "Explicit column mapping per sheets/CRM_SHEET_TEMPLATE.md.",
       "notesInFlow": true
     },
     {
@@ -587,13 +705,13 @@
           "returnFirstMatch": true
         }
       },
-      "id": "56ee3a1c-51f8-4844-9491-d4f238b15dcf",
+      "id": "634dc267-c633-4043-ab73-d32fefaccdd6",
       "name": "Lookup support",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
       "position": [
-        1900,
-        20
+        2700,
+        40
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -605,7 +723,7 @@
       "maxTries": 3,
       "waitBetweenTries": 5000,
       "continueOnFail": true,
-      "notes": "Reads existing message_ids from the 'support' tab so we don't insert duplicates.",
+      "notes": "Reads existing message_ids from 'support' so we don't insert duplicates.",
       "notesInFlow": true
     },
     {
@@ -618,7 +736,7 @@
           },
           "conditions": [
             {
-              "id": "ae010830-5dbf-4d8c-b3b5-09281b24a4a6",
+              "id": "2b93fa11-2aa1-4add-9ef8-819d0384e27e",
               "leftValue": "={{ $json.message_id ? $json.message_id : '' }}",
               "rightValue": "",
               "operator": {
@@ -630,15 +748,54 @@
           "combinator": "and"
         }
       },
-      "id": "44e329ac-c653-43da-893e-b8c3dac74607",
+      "id": "ff3e3b54-c416-4a6e-a02d-c5aa55cbbfe6",
       "name": "Already in support?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        2160,
-        20
+        2960,
+        40
       ],
-      "notes": "Short-circuits with duplicate_skipped=true if lookup found this message_id.",
+      "notes": "Output 0 (TRUE) = duplicate, SKIP append.\nOutput 1 (FALSE) = new message, proceed to append.\nCondition: $json.message_id is non-empty (lookup returned a row).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aff419a4-e9dd-4146-be41-ba50cfb09ebc",
+              "name": "duplicate_skipped",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "481f1ec0-fb8e-4351-a4e4-9a2effff0fcf",
+              "name": "duplicate_tab",
+              "type": "string",
+              "value": "support"
+            },
+            {
+              "id": "22948b72-59b0-4fa7-9a66-2d777a258dfa",
+              "name": "message_id",
+              "type": "string",
+              "value": "={{ $json.message_id }}"
+            }
+          ]
+        },
+        "options": {
+          "include": "all"
+        }
+      },
+      "id": "0d48e593-abdd-4aec-9e6d-00fa9b8b05cf",
+      "name": "Duplicate skipped (support)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        3200,
+        -40
+      ],
+      "notes": "PDF §3.4: short-circuit with duplicate_skipped=true for support.",
       "notesInFlow": true
     },
     {
@@ -671,13 +828,13 @@
         },
         "options": {}
       },
-      "id": "3f33b5bd-2f0f-4938-b589-1f231d6ee7a4",
+      "id": "b5dcc706-2bf7-440e-a229-3a762d9977ec",
       "name": "Append support",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
       "position": [
-        2420,
-        -40
+        3200,
+        120
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -718,13 +875,13 @@
           "returnFirstMatch": true
         }
       },
-      "id": "02d06e4d-dfd6-4309-8032-9d295bb24a80",
+      "id": "507e7ee3-dddc-470f-8a18-f07aa6c329d0",
       "name": "Lookup spam",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
       "position": [
-        1900,
-        220
+        2700,
+        260
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -736,7 +893,7 @@
       "maxTries": 3,
       "waitBetweenTries": 5000,
       "continueOnFail": true,
-      "notes": "Reads existing message_ids from the 'spam' tab so we don't insert duplicates.",
+      "notes": "Reads existing message_ids from 'spam' so we don't insert duplicates.",
       "notesInFlow": true
     },
     {
@@ -749,7 +906,7 @@
           },
           "conditions": [
             {
-              "id": "a3462ba5-46ec-40bc-9d51-a20ad71456e7",
+              "id": "f50dff7f-c880-4c6a-b726-bf836741493b",
               "leftValue": "={{ $json.message_id ? $json.message_id : '' }}",
               "rightValue": "",
               "operator": {
@@ -761,15 +918,54 @@
           "combinator": "and"
         }
       },
-      "id": "40ebd8aa-5fc8-449f-b28d-98cfdd7c572e",
+      "id": "cafae255-3658-4e70-a5c6-6b5f2815afdb",
       "name": "Already in spam?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        2160,
-        220
+        2960,
+        260
       ],
-      "notes": "Short-circuits with duplicate_skipped=true if lookup found this message_id.",
+      "notes": "Output 0 (TRUE) = duplicate, SKIP append.\nOutput 1 (FALSE) = new message, proceed to append.\nCondition: $json.message_id is non-empty (lookup returned a row).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a98e416b-f4f8-48a9-ae24-99b14c469a08",
+              "name": "duplicate_skipped",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "94eaff9f-1c1d-4fed-8f60-6fdd330732c9",
+              "name": "duplicate_tab",
+              "type": "string",
+              "value": "spam"
+            },
+            {
+              "id": "e4bbc336-665b-4828-a3bc-461f1d0d39fd",
+              "name": "message_id",
+              "type": "string",
+              "value": "={{ $json.message_id }}"
+            }
+          ]
+        },
+        "options": {
+          "include": "all"
+        }
+      },
+      "id": "a708cbab-d240-495f-9f1c-611ee3429209",
+      "name": "Duplicate skipped (spam)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        3200,
+        180
+      ],
+      "notes": "PDF §3.4: short-circuit with duplicate_skipped=true for spam.",
       "notesInFlow": true
     },
     {
@@ -801,13 +997,13 @@
         },
         "options": {}
       },
-      "id": "76abdebb-13d8-473b-8568-05838fa18bc4",
+      "id": "2b4fc8f3-082b-4891-a9ec-a86435f34afe",
       "name": "Append spam",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
       "position": [
-        2420,
-        160
+        3200,
+        340
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -848,13 +1044,13 @@
           "returnFirstMatch": true
         }
       },
-      "id": "eb7c6a26-712b-46f0-88f5-4a735ccf7c63",
+      "id": "5866bcd4-c6d2-478e-864a-e4ee9eb2dbb8",
       "name": "Lookup other",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
       "position": [
-        1900,
-        420
+        2700,
+        480
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -866,7 +1062,7 @@
       "maxTries": 3,
       "waitBetweenTries": 5000,
       "continueOnFail": true,
-      "notes": "Reads existing message_ids from the 'other' tab so we don't insert duplicates.",
+      "notes": "Reads existing message_ids from 'other' so we don't insert duplicates.",
       "notesInFlow": true
     },
     {
@@ -879,7 +1075,7 @@
           },
           "conditions": [
             {
-              "id": "13600ae5-0e70-406f-90d7-24ecfe17d924",
+              "id": "b4b5f7db-ceba-4ac9-8b3d-1b0161cba06e",
               "leftValue": "={{ $json.message_id ? $json.message_id : '' }}",
               "rightValue": "",
               "operator": {
@@ -891,15 +1087,54 @@
           "combinator": "and"
         }
       },
-      "id": "20163327-8a83-4402-8c94-1c3dc8b1d543",
+      "id": "89631560-0b20-4be9-a628-38ce9a78c75e",
       "name": "Already in other?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        2160,
-        420
+        2960,
+        480
       ],
-      "notes": "Short-circuits with duplicate_skipped=true if lookup found this message_id.",
+      "notes": "Output 0 (TRUE) = duplicate, SKIP append.\nOutput 1 (FALSE) = new message, proceed to append.\nCondition: $json.message_id is non-empty (lookup returned a row).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "084ced90-f675-4192-8174-beb89328eea4",
+              "name": "duplicate_skipped",
+              "type": "boolean",
+              "value": true
+            },
+            {
+              "id": "371db978-7f52-40c7-ba92-258e03f387fa",
+              "name": "duplicate_tab",
+              "type": "string",
+              "value": "other"
+            },
+            {
+              "id": "72f9e55f-ff57-46aa-a53e-69691b549111",
+              "name": "message_id",
+              "type": "string",
+              "value": "={{ $json.message_id }}"
+            }
+          ]
+        },
+        "options": {
+          "include": "all"
+        }
+      },
+      "id": "ff975a81-c220-42bb-9a0a-3417c2a84bef",
+      "name": "Duplicate skipped (other)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        3200,
+        400
+      ],
+      "notes": "PDF §3.4: short-circuit with duplicate_skipped=true for other.",
       "notesInFlow": true
     },
     {
@@ -931,13 +1166,13 @@
         },
         "options": {}
       },
-      "id": "081dcb40-35bc-4176-bed6-dbfa2120ec2e",
+      "id": "791d62fa-fd2d-4db1-97b5-180d3b07f791",
       "name": "Append other",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
       "position": [
-        2420,
-        360
+        3200,
+        560
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -953,18 +1188,68 @@
     },
     {
       "parameters": {
-        "content": "# Draft + Notify\nLEAD branch only.\nDraft Reply (AI) → Gmail Create Draft (NEVER send) → Slack card.",
-        "height": 130,
-        "width": 620,
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "expression",
+          "value": "={{ $node[\"Config\"].json.spreadsheetId }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "errors",
+          "cachedResultName": "errors"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "message_id": "={{ $json.message_id }}",
+            "received_at": "={{ $json.received_at }}",
+            "error_stage": "Route by category (fallback)",
+            "error_message": "={{ 'Unknown category: ' + ($json.category || 'null') + ' | parse_failed=' + ($json.parse_failed || false) }}",
+            "raw_payload": "={{ JSON.stringify({category: $json.category, confidence: $json.confidence, reasoning: $json.reasoning, raw_ai_output: ($json.raw_ai_output || '').slice(0, 800)}).slice(0, 1000) }}",
+            "created_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "id": "c96e4f07-66af-45a9-a538-b4b2bc045c0e",
+      "name": "Log unknown category to errors",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        2960,
+        700
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PLACEHOLDER_SHEETS_OAUTH",
+          "name": "Sheets - Triage Training"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "continueOnFail": true,
+      "notes": "Switch fallback path — writes a row to the 'errors' tab when the classifier emits a category outside LEAD/SUPPORT/SPAM/OTHER. PDF §3.2 verbatim.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "content": "# 🟣 Draft + Notify (LEAD branch only)\nDraft reply → **(parallel)** Create Gmail draft & Post lead card.\nBoth must complete before the execution finishes.",
+        "height": 140,
+        "width": 520,
         "color": 1
       },
-      "id": "64276503-3842-42e9-b651-d5b054a45838",
-      "name": "Section_# Draft + Notify",
+      "id": "2aba590e-8d75-4cd6-b056-e7967d8d6ff2",
+      "name": "Section_DraftNotify",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        40,
-        760
+        3500,
+        -180
       ]
     },
     {
@@ -980,7 +1265,7 @@
           "values": [
             {
               "role": "system",
-              "content": "={{ $node[\"Config\"].json.reply_system_prompt }}"
+              "content": "={{ $node[\"Prompts\"].json.reply_system_prompt }}"
             },
             {
               "role": "user",
@@ -993,13 +1278,13 @@
           "temperature": 0.4
         }
       },
-      "id": "a90cc74a-751b-4cd5-ba5d-2081a74013af",
+      "id": "bab9c812-fe1d-4dd1-855a-dcdbd2897503",
       "name": "Draft reply",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.6,
       "position": [
-        2720,
-        -300
+        3500,
+        40
       ],
       "credentials": {
         "openAiApi": {
@@ -1010,7 +1295,7 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
-      "notes": "Generates the 80-150 word reply body. Temperature 0.4 for natural prose.",
+      "notes": "80-150 word reply; temperature 0.4 for natural prose. Reply prompt sourced from the 'Prompts' Set node.",
       "notesInFlow": true
     },
     {
@@ -1025,13 +1310,13 @@
           "threadId": "={{ $('Parse classification').item.json.thread_id }}"
         }
       },
-      "id": "f8d2efbe-51f6-401a-90c1-d892d9d75c54",
+      "id": "478cd144-7e1e-4e89-811f-b9fa86026283",
       "name": "Create Gmail draft",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        3020,
-        -300
+        3800,
+        -60
       ],
       "credentials": {
         "gmailOAuth2": {
@@ -1042,7 +1327,24 @@
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
-      "notes": "HARD SAFETY RULE: createDraft only. Never 'send'. CI guard enforces.",
+      "notes": "HARD SAFETY RULE: createDraft only. 'send' is forbidden by the exercise PDF §Phase 4 and by check_no_send.py CI guard.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "id": "5ba8442e-3271-4ffa-89f3-9fc3527b426a",
+      "name": "Wait for draft id",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        3800,
+        140
+      ],
+      "notes": "Tiny no-op delay so Slack reads $('Create Gmail draft').item.json.id after the draft create resolves. Without this the URL in the Slack card can race the API.",
       "notesInFlow": true
     },
     {
@@ -1056,16 +1358,16 @@
           "value": "={{ $node[\"Config\"].json.slackChannel }}"
         },
         "messageType": "block",
-        "blocksUi": "={{ JSON.stringify([\n  {\n    type: 'header',\n    text: {\n      type: 'plain_text',\n      text: '\ud83d\ude80 New lead \u2014 ' + $('Parse classification').item.json.suggested_priority,\n      emoji: true\n    }\n  },\n  {\n    type: 'section',\n    fields: [\n      { type: 'mrkdwn', text: '*From:*\\n' + $('Parse classification').item.json.sender_email },\n      { type: 'mrkdwn', text: '*Domain:*\\n' + $('Parse classification').item.json.sender_domain },\n      { type: 'mrkdwn', text: '*Subject:*\\n' + $('Parse classification').item.json.subject_clean },\n      { type: 'mrkdwn', text: '*Confidence:*\\n' + Math.round($('Parse classification').item.json.confidence * 100) + '%' }\n    ]\n  },\n  {\n    type: 'section',\n    text: {\n      type: 'mrkdwn',\n      text: '*Preview:*\\n> ' + (($('Parse classification').item.json.body_clean || '').slice(0, 300).replace(/\\n/g, '\\n> '))\n    }\n  },\n  {\n    type: 'actions',\n    elements: [\n      {\n        type: 'button',\n        text: { type: 'plain_text', text: 'Open draft in Gmail', emoji: true },\n        url: 'https://mail.google.com/mail/u/0/#drafts/' + $('Create Gmail draft').item.json.id,\n        style: 'primary'\n      }\n    ]\n  }\n], null, 2) }}",
+        "blocksUi": "={{ (() => {\n  const p   = $('Parse classification').item.json.suggested_priority || 'MEDIUM';\n  const col = p === 'HIGH' ? '#E01E5A' : (p === 'MEDIUM' ? '#ECB22E' : '#2EB67D');\n  const emo = p === 'HIGH' ? ':red_circle:' : (p === 'MEDIUM' ? ':large_orange_circle:' : ':large_green_circle:');\n  const j   = $('Parse classification').item.json;\n  const draftId = $('Create Gmail draft').item?.json?.id || '';\n  const body = (j.body_clean || '').slice(0, 300).replace(/\\n/g, '\\n> ');\n  return JSON.stringify([\n    {\n      color: col,\n      blocks: [\n        {\n          type: 'header',\n          text: { type: 'plain_text', emoji: true,\n                  text: emo + ' New lead — ' + p }\n        },\n        {\n          type: 'section',\n          fields: [\n            { type: 'mrkdwn', text: '*From:*\\n' + (j.sender_email || '') },\n            { type: 'mrkdwn', text: '*Domain:*\\n' + (j.sender_domain || '') },\n            { type: 'mrkdwn', text: '*Subject:*\\n' + (j.subject_clean || '') },\n            { type: 'mrkdwn', text: '*Confidence:*\\n' + Math.round((j.confidence || 0) * 100) + '%' }\n          ]\n        },\n        {\n          type: 'section',\n          text: { type: 'mrkdwn', text: '*Preview:*\\n> ' + body }\n        },\n        {\n          type: 'actions',\n          elements: [\n            { type: 'button',\n              text: { type: 'plain_text', emoji: true, text: 'Open draft in Gmail' },\n              url: 'https://mail.google.com/mail/u/0/#drafts/' + draftId,\n              style: 'primary' }\n          ]\n        },\n        {\n          type: 'context',\n          elements: [\n            { type: 'mrkdwn',\n              text: '_Triaged by LeadInboxTriageBot · ' + (j.message_id || '') + '_' }\n          ]\n        }\n      ]\n    }\n  ]);\n})() }}",
         "otherOptions": {}
       },
-      "id": "5153eec6-92fe-43f8-a276-2e9e80f9916c",
+      "id": "eeaae920-5c66-42e5-8c20-b6a21d73b28b",
       "name": "Post lead card",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.2,
       "position": [
-        3320,
-        -300
+        4100,
+        140
       ],
       "credentials": {
         "slackApi": {
@@ -1077,7 +1379,7 @@
       "maxTries": 3,
       "waitBetweenTries": 5000,
       "continueOnFail": true,
-      "notes": "Posts a Block-Kit card with priority emoji + Open Draft link.",
+      "notes": "Block-Kit card with priority-coloured attachment bar + emoji. Sees the draft URL via $('Create Gmail draft'). The Wait node before this guarantees the draft is created before Slack fires.",
       "notesInFlow": true
     }
   ],
@@ -1094,6 +1396,17 @@
       ]
     },
     "Clean email": {
+      "main": [
+        [
+          {
+            "node": "Compute preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute preview": {
       "main": [
         [
           {
@@ -1158,7 +1471,7 @@
         ],
         [
           {
-            "node": "Lookup other",
+            "node": "Log unknown category to errors",
             "type": "main",
             "index": 0
           }
@@ -1178,7 +1491,13 @@
     },
     "Already in leads?": {
       "main": [
-        [],
+        [
+          {
+            "node": "Duplicate skipped (leads)",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Append leads",
@@ -1201,7 +1520,13 @@
     },
     "Already in support?": {
       "main": [
-        [],
+        [
+          {
+            "node": "Duplicate skipped (support)",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Append support",
@@ -1224,7 +1549,13 @@
     },
     "Already in spam?": {
       "main": [
-        [],
+        [
+          {
+            "node": "Duplicate skipped (spam)",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Append spam",
@@ -1247,7 +1578,13 @@
     },
     "Already in other?": {
       "main": [
-        [],
+        [
+          {
+            "node": "Duplicate skipped (other)",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Append other",
@@ -1275,11 +1612,16 @@
             "node": "Create Gmail draft",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Wait for draft id",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
     },
-    "Create Gmail draft": {
+    "Wait for draft id": {
       "main": [
         [
           {
@@ -1309,10 +1651,13 @@
     },
     {
       "name": "phase-4"
+    },
+    {
+      "name": "batch-may-2026"
     }
   ],
   "meta": {
-    "templateCredsSetupCompleted": false,
-    "description": "Phase 4 — adds Draft Reply (AI), Gmail Create Draft (NEVER send), and Slack lead-card notification on the LEAD branch."
+    "templateCredsSetupCompleted": true,
+    "description": "Lead Inbox Triage Bot — production-style n8n automation. Watches a test Gmail inbox every minute, classifies each new email with an LLM into LEAD/SUPPORT/SPAM/OTHER (strict JSON), logs to a Google Sheets CRM with idempotent appends, drafts (NEVER sends) a personalised reply for genuine sales leads, and posts a Block-Kit lead card to Slack. Failures route to a separate ErrorTrigger sub-workflow that logs to an 'errors' tab and pings Slack.\n\nPhase 4 — on the LEAD branch only: AI Draft Reply, Gmail Create Draft (NEVER send), and a parallel Slack lead card with priority colour-coded attachment + emoji."
   }
 }
