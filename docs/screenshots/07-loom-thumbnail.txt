@@ -1,0 +1,33 @@
+================================================================================
+docs/screenshots/07-loom-thumbnail.txt — Loom recording thumbnail placeholder
+================================================================================
+
+Real thumbnail to be captured live during the Loom recording. Below is the
+intended composition so a designer (or you) can frame the shot identically:
+
+  ┌──────────────────────────────────────────────────────────────────┐
+  │                                                                  │
+  │   Lead Inbox Triage Bot                                          │
+  │   Grootan Technologies · Internal Training                       │
+  │                                                                  │
+  │   ╔══════════════════════════════════════════════════════════╗  │
+  │   ║   [n8n canvas screenshot of Phase 5 full workflow]       ║  │
+  │   ║   - Phase banner sticky visible at top                   ║  │
+  │   ║   - Eight section sticky-note sections labeled           ║  │
+  │   ║   - All 29 functional nodes connected                    ║  │
+  │   ╚══════════════════════════════════════════════════════════╝  │
+  │                                                                  │
+  │   ▶  6:47 walkthrough                                            │
+  │      AI classify → Sheets log → Gmail draft → Slack alert        │
+  │                                                                  │
+  └──────────────────────────────────────────────────────────────────┘
+
+Composition guidelines:
+  • Aspect ratio 16:9 (1920×1080 export from n8n + draw.io callouts)
+  • Title font: any modern sans-serif (Inter, Roboto, system-ui)
+  • Highlight 4 nodes with red callouts:
+      Classify email · Append leads · Create Gmail draft · Post lead card
+  • Bottom-right: Loom play-button icon + duration badge
+
+Save as docs/screenshots/07-loom-thumbnail.png when captured.
+================================================================================

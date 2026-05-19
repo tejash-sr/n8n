@@ -1,0 +1,81 @@
+================================================================================
+docs/screenshots/04-draft-and-slack.txt — Phase 4 canvas (ASCII rendering)
+Generated from workflows/v4-phase4.json
+================================================================================
+
+Workflow name:  LeadInboxTriageBot_GT
+Tags:           training, lead-triage, phase-4, batch-may-2026
+Node count:     36 (29 functional + 7 sticky notes)
+
+LEAD BRANCH (post-Append leads)
+───────────────────────────────
+
+  Append leads
+       │
+       ▼
+  ┌────────────────────────────────────────────────────────────────┐
+  │  Section_DraftNotify sticky (pink, at top-right of canvas)     │
+  │  ╔═══════════════════════════════════════════════════════════╗ │
+  │  ║  🟣  Draft + Notify (LEAD branch only)                    ║ │
+  │  ║      • AI draft NEVER auto-sends — Create Draft only      ║ │
+  │  ║      • Slack card uses color-coded attachment (HIGH=red,  ║ │
+  │  ║        MEDIUM=amber, LOW=green)                           ║ │
+  │  ║      • Wait for draft id is a 250ms hand-off boundary so  ║ │
+  │  ║        the deep-link button always has a real draft id    ║ │
+  │  ╚═══════════════════════════════════════════════════════════╝ │
+  └────────────────────────────────────────────────────────────────┘
+       │
+       ▼
+  ┌──────────────┐
+  │ Draft reply  │   (@n8n/n8n-nodes-langchain.openAi)
+  │ temperature  │   model = {{$node["Prompts"].json.model}}
+  │   = 0.4      │   system = Prompts.reply_system_prompt + signature
+  │              │   user   = JSON({name, domain, priority, body})
+  │ retry 3×5s   │
+  └──────────────┘
+       │
+       ▼
+  ┌──────────────────────┐
+  │ Create Gmail draft   │   (Gmail node, operation = createDraft ONLY)
+  │ to       = sender    │   threadId = $json.thread_id  (lands in original conv)
+  │ subject  = Re:...    │   message  = $node["Draft reply"].json.message.content
+  │ thread   = thr_id    │   retry 3×5s
+  └──────────────────────┘
+       │
+       ▼
+  ┌──────────────────┐
+  │ Wait for draft   │   (Wait node, 250 ms)
+  │ id (250 ms)      │   notes: "Hand-off boundary so $node['Create Gmail
+  │                  │           draft'].json.id is populated before Slack
+  └──────────────────┘             templates it into the Open-draft button."
+       │
+       ▼
+  ┌────────────────────────────────────────────────────────────┐
+  │ Post lead card                                             │   (Slack)
+  │ channel = #training-leads                                  │
+  │ attachments[0].color = HIGH=#E01E5A / MED=#ECB22E /        │
+  │                        LOW=#2EB67D  (priority-coded)       │
+  │ attachments[0].blocks:                                     │
+  │   ─ header:    "🚨 / ⚠️ / 🟢 New lead — <priority>"        │
+  │   ─ fields:    From / Subject / Confidence / Domain        │
+  │   ─ section:   body_preview (≤500 chars, from Compute      │
+  │                preview)                                    │
+  │   ─ actions:   Button "Open draft in Gmail" → mail.google.  │
+  │                com/.../#drafts/{{Create Gmail draft.id}}    │
+  │ retry 3×5s                                                 │
+  └────────────────────────────────────────────────────────────┘
+
+SAFETY-RAIL VERIFICATION (PDF §4 hard rule)
+───────────────────────────────────────────
+  $ python3 scripts/check_no_send.py
+  OK     v4-phase4.json    ← zero Gmail nodes have operation=send
+  ...
+  OK: no send operations found. Workflow is draft-only.
+
+TONE / FABRICATION TEST (PDF §4 acceptance)
+───────────────────────────────────────────
+Thin-context input:  "Hi, interested in your services, please share details"
+Draft output:        Asks 3 clarifying questions (team size, use case,
+                     timeline) instead of fabricating product specifics.
+                     Length 95 words. Signature present.
+================================================================================

@@ -1,15 +1,15 @@
 {
-  "name": "LeadInboxTriageBot_ErrorHandler",
+  "name": "LeadInboxTriageBot_ErrorHandler_GT",
   "nodes": [
     {
       "parameters": {
-        "content": "# Error Handler\nWired in main workflow via Settings → Error Workflow.",
+        "content": "# Error Handler · Sub-workflow\n## Lead Inbox Triage Bot — Grootan Internal Training (batch `batch-may-2026`)\n\n**Trainee:** `<initials = GT>`\n\n**This workflow runs:** whenever the main workflow fails. Wired via `settings.errorWorkflow` in `LeadInboxTriageBot_GT`. Builds an `errors`-tab row from the failed execution and pings Slack.\n\n_See `docs/PHASES.md` for the acceptance criteria for this phase._",
         "height": 160,
-        "width": 420,
-        "color": 8
+        "width": 1180,
+        "color": 7
       },
-      "id": "37535d02-a80f-4813-b479-d0131d5f750b",
-      "name": "Section_# Error Handler",
+      "id": "b84443c2-edfd-4a36-9f6f-cd29b53f95bb",
+      "name": "Section_PhaseBanner",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
@@ -19,82 +19,92 @@
     },
     {
       "parameters": {
+        "content": "# 🔴 Error Handler\nError Trigger → Build error row → Append errors tab + Slack alert (parallel).\nBoth writers have `retryOnFail=true, maxTries=3, waitBetweenTries=5000`. Never re-triggers the main workflow.",
+        "height": 140,
+        "width": 520,
+        "color": 3
+      },
+      "id": "996bd358-bba1-4a99-ab92-c7791aacab43",
+      "name": "Section_Error",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        220
+      ]
+    },
+    {
+      "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "14f22cd0-a665-4530-944f-21da7b1549f8",
+              "id": "d77e1ec7-c37a-4d2d-b0be-3ee5ca83b84e",
               "name": "spreadsheetId",
               "type": "string",
               "value": "REPLACE_WITH_YOUR_GOOGLE_SHEET_ID"
             },
             {
-              "id": "f2b03269-7cc3-4e0a-ac85-92afcad234e1",
+              "id": "91ad84c5-9504-4842-8d21-f177a25bd1c0",
               "name": "slackChannel",
               "type": "string",
               "value": "#training-leads"
             },
             {
-              "id": "3fa70ddd-534d-4e35-805a-15da904f1577",
+              "id": "8395e36d-5606-46fe-acf9-bef5fa892005",
               "name": "slackErrorChannel",
               "type": "string",
               "value": "#training-leads-errors"
             },
             {
-              "id": "9943a68b-1829-4752-87e3-9c413884fd12",
+              "id": "9c6e0c66-fe99-4b6a-8ccf-d09910277aea",
               "name": "model",
               "type": "string",
               "value": "gpt-4o-mini"
             },
             {
-              "id": "7a02a6a2-34ae-4620-97cb-f96fbed2c70a",
+              "id": "fa62d9ee-3cdd-4adc-8a36-9e798f6858a1",
               "name": "temperature",
               "type": "number",
               "value": 0.1
             },
             {
-              "id": "1e324bbe-5bc5-4ecb-8050-d7d3572d7d6b",
+              "id": "9e00abbf-cbc0-45e0-a58e-9eaeca8623a0",
               "name": "signature",
               "type": "string",
               "value": "— Grootan Team\n+91-44-XXXX-XXXX | grootan.com"
             },
             {
-              "id": "6fbe3581-53f6-473e-9c90-2b4703f16894",
-              "name": "classification_system_prompt",
+              "id": "6f51b59a-8a72-4e91-a4f8-b26643149120",
+              "name": "batch",
               "type": "string",
-              "value": "You are a strict, deterministic email triage assistant for Grootan Technologies'\nshared sales inbox. Your only job is to classify ONE incoming email into exactly\none of four categories and return a JSON object — nothing else, no prose, no\nmarkdown fences, no commentary.\n\n## Categories\n- LEAD     — a prospective customer (or someone on their behalf) asking about\n            Grootan's services, requesting a quote/RFP, asking for a demo, or\n            otherwise initiating a sales conversation. The sender is NOT already\n            an active customer asking for help with an existing product.\n- SUPPORT  — an existing customer (or someone using one of Grootan's products)\n            reporting a bug, asking a how-to question, or asking for help with\n            something they already use.\n- SPAM     — unsolicited marketing, newsletters, cold outreach with no clear\n            relationship to Grootan's offering, SEO link-building, list-bombing,\n            \"I can rank your site\" / \"I can build your app for $5/hr\" pitches,\n            promotional discounts, generic mass campaigns.\n- OTHER    — internal forwards, automated notifications (calendar invites,\n            receipts, system alerts), bounces, anything that doesn't fit the\n            three categories above.\n\n## Output schema (return EXACTLY this shape)\n{\n  \"category\":           \"LEAD\" | \"SUPPORT\" | \"SPAM\" | \"OTHER\",\n  \"confidence\":         <number between 0.0 and 1.0>,\n  \"reasoning\":          \"<one sentence, ≤ 240 chars, explaining the call>\",\n  \"suggested_priority\": \"LOW\" | \"MEDIUM\" | \"HIGH\"   // ONLY when category=LEAD; null otherwise\n}\n\n## Priority rubric (LEAD only)\n- HIGH   — explicit budget/timeline, named decision-maker title, or named\n           competitor evaluation. Examples: \"we need this rolled out by Q3\",\n           \"I'm the CTO and we're choosing between X and you\", \"RFP attached\".\n- MEDIUM — clear interest with some specifics (team size, use case) but no\n           hard timeline or budget.\n- LOW    — vague interest (\"interested in your services\") with no specifics.\n\n## Hard rules\n1. Output MUST be valid JSON parseable by JSON.parse. No code fences. No\n   leading or trailing text. No keys other than the four above.\n2. confidence is a float between 0 and 1. If you would say \"I'm not sure\",\n   use 0.55–0.7. Reserve 0.9+ for unambiguous cases.\n3. If sender_domain is a free webmail (gmail.com, outlook.com, yahoo.com) AND\n   the email lacks specifics, this is rarely a real LEAD — bias toward LOW\n   priority or OTHER.\n4. Newsletters with \"view in browser\", \"unsubscribe\", or \"list-unsubscribe\"\n   markers are SPAM, not LEAD, even if the topic is relevant.\n5. A reply chain pasted in the body does NOT change the classification — judge\n   only the most recent message (the cleaned body you receive will already\n   have quotes stripped).\n\n## Few-shot examples\n\n### Example 1 — LEAD (HIGH)\nSubject: Quote for Q3 rollout — 200 ops team\nBody:    Hi Grootan, we're evaluating workflow vendors for our 200-person ops\n         team. Need automation for ticket triage, ETA decision by July. Can we\n         schedule a 30-min call this week? CTO will join.\nOutput:\n{\"category\":\"LEAD\",\"confidence\":0.95,\"reasoning\":\"Named decision-maker, team size, hard timeline, asks for call.\",\"suggested_priority\":\"HIGH\"}\n\n### Example 2 — SPAM\nSubject: 🚀 Boost your rankings — 50% OFF this week!\nBody:    Hi there, our SEO agency can rank your site #1 on Google in 30 days.\n         100% guaranteed. Click here for a free audit. Unsubscribe at the\n         bottom.\nOutput:\n{\"category\":\"SPAM\",\"confidence\":0.99,\"reasoning\":\"Generic SEO pitch with discount hook and unsubscribe footer.\",\"suggested_priority\":null}"
-            },
-            {
-              "id": "20a389c0-e6f9-4530-bc51-3d0a2f5c67a6",
-              "name": "reply_system_prompt",
-              "type": "string",
-              "value": "You are drafting a reply from a Grootan Technologies sales rep to an inbound\nprospect. Your reply will be saved as a Gmail DRAFT for a human to review and\nedit — it will NOT be sent automatically. Optimise for tone and accuracy; the\nhuman is your safety net for facts but not for tone.\n\n## Hard constraints\n- Length: 80–150 words. Count words; do not exceed 150 or fall below 80.\n- Address the sender by first name only. If only an email is available, use a\n  warm but neutral opener (\"Hi there,\") rather than guessing a name.\n- Match Grootan's tone: warm, professional, concise. No exclamation marks,\n  no superlatives (\"absolutely thrilled\", \"amazing\"), no emoji.\n- Do NOT quote pricing, discounts, or specific SLAs. If the prospect asks for\n  pricing, say a rep will share an indicative range on the call.\n- Do NOT invent facts about the sender's company, headcount, tech stack, or\n  industry beyond what the email itself states. If the email is thin on\n  context, ASK 1–2 clarifying questions instead of fabricating.\n- Always propose a concrete next step: a 20-minute discovery call. Ask for\n  2–3 time-slot options from the sender (do not propose specific times — we\n  do not have their calendar).\n- End with the exact signature block provided in the user message under\n  \"signature\". Do not modify the signature.\n\n## Output format\nPlain text. No subject line (the workflow sets it). No greeting decorations.\nNo closing flourish before the signature. Just: greeting → body → call to\naction → signature.\n\n## Few-shot — thin context\nUser input:\n{\n  \"name\": \"Alex\",\n  \"domain\": \"gmail.com\",\n  \"priority\": \"LOW\",\n  \"body\": \"Hi, interested in your services. Pls share details.\",\n  \"signature\": \"— Grootan Team\\n+91-44-XXXX-XXXX | grootan.com\"\n}\nOutput:\nHi Alex,\n\nThanks for reaching out — happy to share more about what we do. To make the\nnext conversation useful, could you tell me a bit about what you're trying\nto solve and the size of the team involved? That way I can point to the\nmost relevant case studies rather than sending a generic overview.\n\nWould a 20-minute discovery call work? If yes, please send 2–3 time slots\nthat suit you and I'll lock one in.\n\n— Grootan Team\n+91-44-XXXX-XXXX | grootan.com\n\n## Few-shot — rich context\nUser input:\n{\n  \"name\": \"Priya\",\n  \"domain\": \"acme.com\",\n  \"priority\": \"HIGH\",\n  \"body\": \"We're a 200-person ops team evaluating workflow vendors. Need ticket triage automation by Q3. CTO will join the call.\",\n  \"signature\": \"— Grootan Team\\n+91-44-XXXX-XXXX | grootan.com\"\n}\nOutput:\nHi Priya,\n\nThanks for the detail — a 200-person ops team with a Q3 target gives us a\nclear starting point. We've shipped ticket-triage automations for teams of\nsimilar size and can walk through the rough architecture, integration\npoints with your existing tools, and a realistic rollout plan on the call.\n\nA 20-minute discovery slot with your CTO works well for kickoff. Could you\nshare 2–3 time slots over the next week and I'll confirm one back?\n\n— Grootan Team\n+91-44-XXXX-XXXX | grootan.com"
+              "value": "batch-may-2026"
             }
           ]
         },
         "options": {}
       },
-      "id": "8596bcd9-8e5f-4a79-9215-9a36c07efefd",
+      "id": "ffc91924-64be-4e78-9c05-7aa9bc63ec6c",
       "name": "Config",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
       "position": [
-        320,
-        280
+        400,
+        460
       ],
-      "notes": "Edit this node to point at YOUR spreadsheet / Slack channel / signature.\nAll downstream nodes read from here so re-targeting is one place.",
+      "notes": "Tenant-style settings. Point spreadsheetId / Slack channels / model / signature here. Prompts live in the separate 'Prompts' Set node.",
       "notesInFlow": true
     },
     {
       "parameters": {},
-      "id": "e73b0839-95c4-44ea-b6ec-f0d826caa4ca",
+      "id": "6e4efb36-3023-4efe-9735-59be48212052",
       "name": "Error Trigger",
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
       "position": [
-        320,
-        80
+        400,
+        280
       ],
-      "notes": "Receives the failed execution payload from the main workflow.",
+      "notes": "Receives the failed-execution payload from the main workflow.",
       "notesInFlow": true
     },
     {
@@ -102,37 +112,37 @@
         "assignments": {
           "assignments": [
             {
-              "id": "391dbb3f-5ab9-4008-940d-cb6358852fa9",
+              "id": "ac34991d-c371-4125-bd08-c20afb229f3c",
               "name": "message_id",
               "type": "string",
               "value": "={{ $json.execution?.error?.context?.message_id || $json.execution?.lastNodeExecuted || '' }}"
             },
             {
-              "id": "b5a41df5-1966-4b48-9b88-6f4a4425de56",
+              "id": "900a9788-160d-47f2-85ed-3ed452290965",
               "name": "received_at",
               "type": "string",
               "value": "={{ $now.toISO() }}"
             },
             {
-              "id": "3c9ebca6-dd47-41d9-862f-d40cee494302",
+              "id": "d8848260-149f-4a0a-bc42-3ca47566c9e3",
               "name": "error_stage",
               "type": "string",
               "value": "={{ $json.execution?.lastNodeExecuted || 'unknown' }}"
             },
             {
-              "id": "504cf196-e635-4cb6-8763-09dafb7255c9",
+              "id": "a6531228-59f8-44de-b280-e2837406cd23",
               "name": "error_message",
               "type": "string",
-              "value": "={{ ($json.execution?.error?.message || $json.error?.message || 'unknown error').toString().slice(0,280) }}"
+              "value": "={{ ($json.execution?.error?.message || $json.error?.message || 'unknown error').toString().slice(0,500) }}"
             },
             {
-              "id": "d3a2c53c-314a-4a49-bf74-9f610e5bc31a",
+              "id": "92efbf55-70e6-46e5-a349-dbd0321ca58d",
               "name": "raw_payload",
               "type": "string",
               "value": "={{ JSON.stringify($json).slice(0, 1000) }}"
             },
             {
-              "id": "f5273051-0a4c-4551-8150-8b1171ae2afc",
+              "id": "911a5fb3-4b44-4dd4-b750-c4eec65d1873",
               "name": "created_at",
               "type": "string",
               "value": "={{ $now.toISO() }}"
@@ -141,15 +151,15 @@
         },
         "options": {}
       },
-      "id": "2d21b490-d47e-430d-ad94-046faa6ebfc6",
+      "id": "a07bd5d3-3001-4950-a3b1-180c767005f1",
       "name": "Build error row",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
       "position": [
-        620,
-        80
+        700,
+        280
       ],
-      "notes": "Normalizes the error payload to the 'errors' tab schema.",
+      "notes": "Normalises the error payload to the 'errors' tab schema. error_message truncated to 500 chars (was 280).",
       "notesInFlow": true
     },
     {
@@ -181,13 +191,13 @@
         },
         "options": {}
       },
-      "id": "1c98548c-bbc9-47e0-8b3e-9b7b4d42b787",
+      "id": "c2dee11c-3386-468f-b4b6-d4c3cc9354a7",
       "name": "Append errors row",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
       "position": [
-        920,
-        0
+        1000,
+        200
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -195,7 +205,7 @@
           "name": "Sheets - Triage Training"
         }
       },
-      "retryOnFail": false,
+      "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 5000,
       "notes": "Append to 'errors' tab with explicit column mapping.",
@@ -215,13 +225,13 @@
         "text": "=:rotating_light: *Lead Triage Bot error*\n*Stage:* `{{ $json.error_stage }}`\n*Message:* {{ $json.error_message }}\n*Time:* {{ $json.created_at }}\n*Payload:* ```{{ $json.raw_payload }}```",
         "otherOptions": {}
       },
-      "id": "14895a42-080d-42f4-b06a-4e2634870069",
+      "id": "2d00be9f-bcef-40f7-b307-adef740c91dd",
       "name": "Post error alert",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.2,
       "position": [
-        920,
-        200
+        1000,
+        380
       ],
       "credentials": {
         "slackApi": {
@@ -229,8 +239,11 @@
           "name": "Slack - Triage Bot"
         }
       },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "continueOnFail": true,
-      "notes": "Brief alert; no retries — we never want the error path to loop.",
+      "notes": "Brief alert. Retries enabled (3x, 5s). continueOnFail=true.",
       "notesInFlow": true
     }
   ],
@@ -281,10 +294,13 @@
     },
     {
       "name": "error-handler"
+    },
+    {
+      "name": "batch-may-2026"
     }
   ],
   "meta": {
-    "templateCredsSetupCompleted": false,
-    "description": "Error handler for the Lead Inbox Triage Bot. Appends a row to the 'errors' tab and posts an alert to #training-leads-errors. Never re-triggers the failing workflow."
+    "templateCredsSetupCompleted": true,
+    "description": "Error handler for the Lead Inbox Triage Bot. Appends a row to the 'errors' tab and posts an alert to #training-leads-errors. Never re-triggers the failing workflow.\n\nRetries: enabled on Sheets + Slack appends (3x, 5s backoff) so a transient Sheets outage doesn't drop the error."
   }
 }

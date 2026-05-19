@@ -1,0 +1,75 @@
+================================================================================
+docs/screenshots/02-classify.txt — Phase 2 canvas (ASCII rendering)
+Generated from workflows/v2-phase2.json
+================================================================================
+
+Workflow name:  LeadInboxTriageBot_GT
+Tags:           training, lead-triage, phase-2, batch-may-2026
+Node count:     12 (7 functional + 5 sticky notes)
+
+CANVAS LAYOUT
+─────────────
+
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │ Section_PhaseBanner                                                          │
+  │   ╔══════════════════════════════════════════════════════════════════╗      │
+  │   ║ 📌  Phase 2 · AI Classification with Structured Output           ║      │
+  │   ║      • Strip quoted reply chains + signature                     ║      │
+  │   ║      • Two-pass Set: Clean email → Compute preview               ║      │
+  │   ║      • OpenAI Chat with response_format=json_object              ║      │
+  │   ║      • Function safety net guarantees one of 4 categories        ║      │
+  │   ╚══════════════════════════════════════════════════════════════════╝      │
+  │                                                                              │
+  │ [Trigger]      [Pre-process]               [Classify]                        │
+  │  yellow         orange                      blue                             │
+  │                                                                              │
+  │ ┌──────┐  ┌────────────┐  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐│
+  │ │Config│─▶│ Watch inbox│─▶│  Prompts    │─▶│ Clean email │─▶│Compute preview││
+  │ │(Set) │  │ (gmailTrig)│  │  (Set)      │  │ (Set)       │  │ (Set, 2-pass) ││
+  │ └──────┘  └────────────┘  └─────────────┘  └─────────────┘  └──────────────┘│
+  │                                                                  │           │
+  │                                                                  ▼           │
+  │                          ┌──────────────────┐   ┌────────────────────┐      │
+  │                          │ Parse            │◀──│ Classify email     │      │
+  │                          │ classification   │   │ (OpenAI Chat,      │      │
+  │                          │ (Function)       │   │  json_object)      │      │
+  │                          └──────────────────┘   └────────────────────┘      │
+  │                                                                              │
+  └─────────────────────────────────────────────────────────────────────────────┘
+
+KEY NEW NODES (vs Phase 1)
+──────────────────────────
+
+  Prompts          (Set, separate from Config — owned by the AI engineer)
+                   notes: "Single source of truth for both system prompts.
+                           Edit prompts here, not inside the AI nodes."
+                   fields: classification_system_prompt, reply_system_prompt,
+                           model, temperature_classifier, temperature_draft
+
+  Clean email      (Set)
+                   notes: "Strip quoted replies + signature from raw Gmail body.
+                           Produces body_clean — does NOT compute body_preview
+                           here (see Compute preview)."
+                   fields: message_id, thread_id, sender_email, sender_name,
+                           sender_domain, subject_clean, body_clean, received_at
+
+  Compute preview  (Set, second pass)
+                   notes: "Computes body_preview by slicing the just-computed
+                           body_clean. Lives in its own node because n8n does
+                           not guarantee evaluation order of sibling fields
+                           inside a single Set node."
+                   field:  body_preview = {{$json.body_clean.slice(0,500)}}
+
+  Classify email   (@n8n/n8n-nodes-langchain.openAi)
+                   model={{$node["Prompts"].json.model}}
+                   temperature={{$node["Prompts"].json.temperature_classifier}}
+                   response_format=json_object
+                   system={{$node["Prompts"].json.classification_system_prompt}}
+                   user=Subject:... Body:...
+                   retryOnFail=true, maxTries=3, waitBetweenTries=5000
+
+  Parse class.     (Function)
+                   notes: "Safety net — coerces any AI output to the strict
+                           {category, confidence, reasoning, suggested_priority,
+                            parse_failed} schema. Never throws."
+================================================================================

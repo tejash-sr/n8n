@@ -56,7 +56,7 @@ Each row tells you exactly where the main workflow blew up:
 | `message_id`    | Original Gmail message id (may be blank if failure was pre-trigger)     |
 | `received_at`   | When the email landed                                                    |
 | `error_stage`   | The node name that threw (`Classify email`, `Append leads`, …)           |
-| `error_message` | First 280 chars of the n8n error                                         |
+| `error_message` | First 500 chars of the n8n error                                         |
 | `raw_payload`   | First 1000 chars of the failed-item JSON, for forensics                  |
 | `created_at`    | When the error was logged                                                |
 
@@ -102,7 +102,18 @@ chore(prompt): tighten SPAM rules to catch list-unsubscribe newsletters
 
 ---
 
-## 8. Scaling beyond training (informational)
+## 8. Known operational caveats (read before deploying)
+
+### 8.1 Gmail Trigger has no in-node retry
+n8n's Gmail Trigger is a polling node — when its OAuth call fails it surfaces the error immediately and **does not** participate in the `retryOnFail / maxTries / waitBetweenTries` lattice that we configure on every downstream Gmail/Sheets/OpenAI/Slack node. The trigger relies on its own internal polling cycle to recover: if the first poll after a transient outage succeeds, the next poll a minute later will catch the email anyway. **Implication:** if Gmail OAuth is revoked or rate-limited, the workflow effectively pauses until the credential is re-authorised. The Error Trigger sub-workflow will catch executions that fail *downstream* of a successful trigger, but not the trigger itself. On-call response: monitor the n8n executions list for a > 5 min gap with no executions and re-authorise the credential.
+
+### 8.2 PII handling — what leaves your n8n
+The classifier sends `subject_clean` + the first 2,000 chars of `body_clean` to OpenAI. The reply-draft step sends sender name + domain + the same body slice. By contractual default OpenAI does **not** train on API-tier traffic, but the request still leaves your network. **Implication:** if you point this bot at a real customer inbox you must (a) confirm your OpenAI org has zero-retention enabled or sign a DPA, (b) decide whether to add a pre-classification PII scrubber (we recommend `presidio` or a regex pass for credit-card / SSN / phone patterns), and (c) document this in your data map. For training-only fixtures this is acceptable; for production data review with Santhosh + Legal first.
+
+### 8.3 Sheets-only CRM is single-writer
+Google Sheets is not a real database. The Lookup → IF → Append idempotency pattern is *cooperative* — if two workflow executions race on the same `message_id`, both may pass the Lookup and produce a duplicate row. In practice the 1-min polling cadence and per-message Gmail dedup make this nearly impossible, but for any prod port you should swap the CRM tab for an upsert-capable store (HubSpot, Salesforce, Postgres with a unique index on `message_id`).
+
+## 9. Scaling beyond training (informational)
 
 The training stack is intentionally SQLite. For a real prod deployment:
 

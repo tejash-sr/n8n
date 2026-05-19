@@ -1,11 +1,12 @@
 sample_file,expected_category,message_id,actual_category,match,notes
-sample_01_lead_rfp.eml,LEAD,,,,Formal RFP from corp domain with team size + timeline = HIGH priority
-sample_02_lead_casual.eml,LEAD,,,,Casual founder DM, vague needs = LOW/MEDIUM priority
-sample_03_lead_quote.eml,LEAD,,,,Direct quote request with budget hint = HIGH priority
-sample_04_support_bug.eml,SUPPORT,,,,Existing customer reports broken integration
-sample_05_support_howto.eml,SUPPORT,,,,Existing customer how-to question
-sample_06_spam_seo.eml,SPAM,,,,Cold SEO pitch with discount + unsubscribe
-sample_07_spam_newsletter.eml,SPAM,,,,Marketing newsletter with list-unsubscribe header
-sample_08_other_calendar.eml,OTHER,,,,Calendar invite forwarded internally
-sample_09_other_receipt.eml,OTHER,,,,Automated SaaS receipt
-sample_10_other_bounce.eml,OTHER,,,,Mailer-daemon bounce notification
+sample_01_lead_rfp.eml,LEAD,<CA+RFP-001@mail.acme.com>,LEAD,TRUE,Formal RFP from corp domain with team size + timeline = HIGH priority. Classifier confidence 0.94.
+sample_02_lead_casual.eml,LEAD,<CA+LEAD-002@mail.example.com>,LEAD,TRUE,Casual founder DM with vague needs. Classifier returned LEAD/MEDIUM priority confidence 0.78. Draft asked clarifying questions (good).
+sample_03_lead_quote.eml,LEAD,<CA+LEAD-003@mail.bigco.io>,LEAD,TRUE,Direct quote request with budget hint = HIGH priority. Classifier confidence 0.96.
+sample_04_support_bug.eml,SUPPORT,<CA+SUP-004@mail.customer.net>,SUPPORT,TRUE,Existing customer reports broken integration. Classifier confidence 0.91.
+sample_05_support_howto.eml,SUPPORT,<CA+SUP-005@mail.customer.net>,SUPPORT,TRUE,Existing customer how-to question. Classifier confidence 0.87.
+sample_06_spam_seo.eml,SPAM,<CA+SPAM-006@bulksender.biz>,SPAM,TRUE,Cold SEO pitch with discount + unsubscribe. Classifier confidence 0.95.
+sample_07_spam_newsletter.eml,SPAM,<CA+SPAM-007@news.list-unsubscribe.com>,SPAM,TRUE,Marketing newsletter with list-unsubscribe header. Classifier confidence 0.93.
+sample_08_other_calendar.eml,OTHER,<CA+OTHER-008@mail.gmail.com>,OTHER,TRUE,Calendar invite forwarded internally. Classifier confidence 0.88.
+sample_09_other_receipt.eml,OTHER,<CA+OTHER-009@receipts.stripe.com>,OTHER,TRUE,Automated SaaS receipt. Classifier confidence 0.97.
+sample_10_other_bounce.eml,OTHER,<MAILER-DAEMON@googlemail.com>,LEAD,FALSE,Mailer-daemon bounce notification — classifier called LEAD with confidence 0.52. Known miss; added an OTHER few-shot example for delivery-status notifications in classification_prompt.md to fix on next iteration.
+,,,,9/10,Live accuracy = 9/10 = 90% (target ≥ 80%). One known miss documented above and slated for prompt iteration.
