@@ -63,7 +63,8 @@ feat(phase-1): bootstrap workflow, Gmail trigger, seed data + test fixtures
 ### Build steps
 
 1. **Add a Set node `Prompts`** in the Classify section. Store the full classification system prompt under field `classification_system_prompt` (see [`prompts/classification_prompt.md`](prompts/classification_prompt.md)). Add `model = gpt-4o-mini` and `temperature = 0.1` here too, so they are editable without opening the AI node.
-2. **Add a Set node `Clean email`** with the 4 expressions from [`ARCHITECTURE.md`](ARCHITECTURE.md) §4: `subject_clean`, `body_clean`, `sender_domain`, `sender_name`, `body_preview`, plus pass-through `message_id`, `thread_id`, `received_at`, `sender_email`. Enable *Keep Only Set* = false so the original fields remain available.
+2. **Add a Set node `Clean email`** with these expressions from [`ARCHITECTURE.md`](ARCHITECTURE.md) §4: `subject_clean`, `body_clean`, `sender_domain`, `sender_name`, plus pass-through `message_id`, `thread_id`, `received_at`, `sender_email`. Enable *Keep Only Set* = false so the original fields remain available.
+2a. **Add a second Set node `Compute preview`** directly after `Clean email` with one field: `body_preview = {{$json.body_clean.slice(0,500)}}`. The split is deliberate — n8n does not guarantee evaluation order of sibling fields inside a single Set node, so deriving `body_preview` from the just-computed `body_clean` requires a fresh node boundary. See [`ARCHITECTURE.md`](ARCHITECTURE.md) §4 for the why.
 3. **Add an OpenAI Chat node `Classify email`** wired after `Clean email`:
    - Model: `={{ $node["Prompts"].json.model }}`
    - Temperature: `={{ $node["Prompts"].json.temperature }}`
@@ -101,15 +102,10 @@ feat(phase-2): add Clean email + AI classifier with strict JSON safety net
 ### Build steps
 
 1. **Create CRM tabs** with the schema in [`sheets/CRM_SHEET_TEMPLATE.md`](../sheets/CRM_SHEET_TEMPLATE.md).
-2. **Add a Switch node `Route by category`** with 5 outputs:
-   - 1: `LEAD`
-   - 2: `SUPPORT`
-   - 3: `SPAM`
-   - 4: `OTHER`
-   - 5: *fallback* → wired to the error handler (`Append errors row`).
-3. **Add an idempotency pre-check** on each branch:
-   - `Lookup leads by message_id` (Google Sheets `Lookup` operation, range `leads!A:A`, lookup column `message_id`).
-   - **IF node `Already logged?`** — true branch → `Set: duplicate_skipped=true` → end. false branch → `Append leads`.
+2. **Add a Switch node `Route by category`** with 4 named outputs (LEAD / SUPPORT / SPAM / OTHER) **and** a fallback output. Set `options.fallbackOutput = "extra"` and wire the fallback to a new Google Sheets node `Log unknown category to errors` (tab=`errors`) so that any unknown / future category produced by the LLM (e.g. an unexpected enum value) lands in the errors tab instead of being silently dropped.
+3. **Add an idempotency pre-check** on each branch (per-category, not collapsed into a single tab):
+   - `Lookup <category>` (Google Sheets `Lookup` operation, range `<category>!A:A`, lookup column `message_id`).
+   - **IF node `Already in <category>?`** — true branch → `Duplicate skipped (<category>)` Set node which writes `duplicate_skipped=true` + `skip_reason=already_in_<category>_tab` → end. false branch → `Append <category>`.
 4. **Add `Append <category>` Sheets nodes** with **explicit column mapping** (no “Map all fields”):
    - `leads` columns: `message_id, received_at, sender_email, sender_domain, subject, body_preview, priority, confidence, status, created_at`
    - `status` literal value `NEW`
@@ -154,7 +150,8 @@ feat(phase-3): switch routing + Sheets CRM with idempotent appends
    - `Subject = {{$json.subject_clean.startsWith("Re:") ? $json.subject_clean : "Re: " + $json.subject_clean}}`
    - `Message = {{ $node["Draft reply"].json.message.content }}`
    - `Thread ID = {{$json.thread_id}}` *(reply lands in the original conversation)*
-4. **Add a Slack node `Post lead card`** in **parallel** to the Gmail draft (use a `Merge` node afterwards if you want the execution to only complete once both finish). Use the Block-Kit JSON in [`prompts/slack_lead_card.json`](prompts/slack_lead_card.json).
+4. **Insert a tiny `Wait for draft id` node (Wait, 250 ms)** after `Create Gmail draft`. This is *not* defensive padding — it's a hand-off boundary so `$node["Create Gmail draft"].json.id` is guaranteed to be populated by the time the Slack card templates the `Open draft in Gmail` deep-link.
+5. **Add a Slack node `Post lead card`** **after** the `Wait for draft id` node. Use the **attachment-style** Block Kit (not just `blocks`) so the `color` field is honoured by Slack — colour-code by priority: HIGH `#E01E5A`, MEDIUM `#ECB22E`, LOW `#2EB67D`. Include the *Open draft in Gmail* button pointing at `https://mail.google.com/mail/u/0/#drafts/{{$node["Create Gmail draft"].json.id}}`.
 5. **Spot-check tone.** Send a "Hi, interested in your services" email → confirm the draft asks clarifying questions instead of fabricating specifics.
 6. **Sent-folder check.** Open Gmail → *Sent* → there must be **zero** new outbound emails after the run.
 7. **Export** as [`workflows/v4-phase4.json`](../workflows/v4-phase4.json).
@@ -188,7 +185,7 @@ feat(phase-4): AI draft reply + Gmail Create Draft + Slack lead card
    - Slack node `Post error alert` → `#training-leads-errors`.
    - Activate this workflow.
 2. **Wire it in.** Open the main workflow → *Settings → Error Workflow* → select `LeadInboxTriageBot_ErrorHandler_<initials>`. Save.
-3. **Configure retries** on every external-call node: `Retry On Fail = true`, `Max Tries = 3`, `Wait Between Tries = 5000`. Do **not** retry on validation errors — n8n's HTTP error class distinction handles this if you keep the default *Retry on HTTP errors only* checkbox enabled. Otherwise restrict explicitly.
+3. **Configure retries** on every external-call node: `Retry On Fail = true`, `Max Tries = 3`, `Wait Between Tries = 5000`. This includes the error handler's own `Append errors row` + `Post error alert` nodes — if the *error logging* itself flakes (e.g. Sheets quota during a thundering herd), retrying it 3× is the only chance you have of capturing the trail. Do **not** retry on validation errors — n8n's HTTP error class distinction handles this if you keep the default *Retry on HTTP errors only* checkbox enabled. Otherwise restrict explicitly. **Note:** the Gmail Trigger has no in-node retry surface — it relies on its own internal 1-minute polling cycle (see [`RUNBOOK.md`](RUNBOOK.md) §8.1).
 4. **Regression run.** Re-send all 10 seed emails. Open the `test_fixtures` tab → the formulas in column `actual_category` and `match` (see template) should fill in automatically. Target ≥ 8/10 — iterate the classification prompt if you fall short.
 5. **Simulated failure test.** In n8n → Credentials → temporarily set the OpenAI key to garbage → send a new email → confirm the error handler logs a row in `errors` and posts to Slack. Restore the credential.
 6. **Loom recording.** Follow the script in [`SETUP.md`](SETUP.md) §10.

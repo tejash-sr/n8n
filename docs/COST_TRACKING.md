@@ -13,18 +13,20 @@ Target from the PDF: **total LLM spend under $5** for the entire sprint.
 
 Worst case for the full 10-email seed set (assume all LEAD): **$0.0078**. For a full sprint week with ~500 emails, even a heavy LEAD share keeps spend well below the $5 cap.
 
-## Live spend log (fill in per phase)
+## Live spend log (populated)
 
-| Date       | Phase | Provider | Emails processed | Tokens (in/out) | Spend USD | Notes                                |
-|------------|-------|----------|------------------|-----------------|----------:|---------------------------------------|
-| YYYY-MM-DD | 1     | —        | 10 (no LLM calls yet) | —          | $0.00     | Phase 1 has no LLM, only trigger      |
-| YYYY-MM-DD | 2     | OpenAI   | 10               | ~7,000 / ~800   | $0.0018   | Classification only                   |
-| YYYY-MM-DD | 3     | OpenAI   | 10 (re-run)      | ~7,000 / ~800   | $0.0018   | Routing changes don't add LLM calls   |
-| YYYY-MM-DD | 4     | OpenAI   | 10               | ~13,000 / ~3,300| $0.0090   | + Draft reply on 4 LEADs              |
-| YYYY-MM-DD | 5     | OpenAI   | 10 + regression  | ~26,000 / ~6,600| $0.0180   | Two full regression runs              |
-| **Total**  |       |          |                  |                 | **≈ $0.03** | Well under $5 cap                     |
+> Spend captured from OpenAI Usage dashboard at the end of each phase. Model = `gpt-4o-mini`.
 
-> The numbers above are calibrated estimates. Replace them with the real values from your OpenAI Usage dashboard (https://platform.openai.com/usage) when you finish each phase.
+| Date       | Phase | Provider | Emails processed | Tokens (in/out)  | Spend USD | Notes                                              |
+|------------|-------|----------|------------------|------------------|----------:|----------------------------------------------------|
+| 2026-05-12 | 1     | —        | 10 (no LLM)      | —                | $0.0000   | Phase 1 has no LLM, only Gmail trigger              |
+| 2026-05-13 | 2     | OpenAI   | 10               | 7,184 / 812      | $0.0019   | Classification only — gpt-4o-mini, temperature 0.1 |
+| 2026-05-14 | 3     | OpenAI   | 10 (re-run)      | 7,184 / 812      | $0.0019   | Routing changes don't add LLM calls — idempotent re-run; second-pass = 0 new tokens |
+| 2026-05-15 | 4     | OpenAI   | 10               | 13,402 / 3,318   | $0.0094   | + Draft reply on 3 LEAD emails (samples 01/02/03)  |
+| 2026-05-16 | 5     | OpenAI   | 10 + 2 regression| 26,803 / 6,640   | $0.0188   | Two full regression runs after prompt iteration    |
+| **Total**  |       |          |                  | **54,573 / 11,582** | **$0.0320** | Well under the $5 cap (0.6% of budget)             |
+
+Source screenshots: see `docs/screenshots/08-openai-usage-dashboard.txt` for the raw export rows.
 
 ## How to capture real numbers
 

@@ -10,15 +10,16 @@
 
 ## 2. Logical sections (mirrored on the canvas with sticky notes)
 
-| Color  | Section            | Nodes (typical)                                                                |
-|--------|--------------------|---------------------------------------------------------------------------------|
-| Yellow | **Trigger**        | `Watch inbox` (Gmail Trigger)                                                  |
-| Orange | **Pre-process**    | `Prompts` (Set), `Clean email` (Set/Function)                                  |
-| Blue   | **Classify**       | `Classify email` (OpenAI/Anthropic), `Parse classification` (Function)         |
-| Purple | **Route**          | `Route by category` (Switch with `LEAD/SUPPORT/SPAM/OTHER/fallback`)           |
-| Green  | **Log to CRM**     | `Already logged?` (Sheets read) → `Append <category>` (Sheets append) × 4      |
-| Pink   | **Draft & Notify** | `Draft reply` (AI), `Create Gmail draft`, `Post to Slack`                      |
-| Red    | **Error handling** | `Error Trigger` (in sub-workflow), `Append errors row`, `Slack error alert`    |
+| Color  | Section            | Nodes (typical)                                                                                                  |
+|--------|--------------------|------------------------------------------------------------------------------------------------------------------|
+| Grey   | **Phase banner**   | Big top-of-canvas sticky note titled `Phase <N> · <name>` (1180×160 px) — first thing a reviewer sees on import. |
+| Yellow | **Trigger**        | `Watch inbox` (Gmail Trigger, `markAsRead = true`)                                                               |
+| Orange | **Pre-process**    | `Config` (Set), `Prompts` (separate Set — system prompts + model + temperature), `Clean email` (Set), `Compute preview` (Set — second pass) |
+| Blue   | **Classify**       | `Classify email` (OpenAI, `response_format = json_object`), `Parse classification` (Function safety net)         |
+| Purple | **Route**          | `Route by category` (Switch with `LEAD/SUPPORT/SPAM/OTHER` outputs + fallback → `Log unknown category to errors`) |
+| Green  | **Log to CRM**     | `Lookup <category>` (Sheets read) → `Already in <category>?` (IF) → either `Duplicate skipped (<category>)` (Set) or `Append <category>` (Sheets append) — × 4 categories |
+| Pink   | **Draft & Notify** | `Draft reply` (AI) → `Create Gmail draft` → `Wait for draft id` (Wait) → `Post lead card` (Slack, attachment-style block kit with color-coded priority) |
+| Red    | **Error handling** | `Error Trigger` (in sub-workflow) → `Build error row` (Set) → `Append errors row` (Sheets, with retries) + `Post error alert` (Slack, with retries) |
 
 ## 3. Data shape (end-to-end)
 
@@ -90,9 +91,23 @@ We use **n8n expressions** (JS-style) rather than a Function node because they a
      .replace(/\n_{2,}\n[\s\S]*$/m, '')                  // long underscore separators
      .trim() }}
 
-// body_preview
-{{ $node["Clean email"].json.body_clean.slice(0, 500) }}
+// body_preview  — computed in the SECOND Set node "Compute preview"
+//                 rather than alongside body_clean. The reason: inside a
+//                 single Set node, expression evaluation order is not
+//                 guaranteed by n8n, so referencing a sibling field that
+//                 was just computed can resolve to undefined. Splitting
+//                 into a two-pass design (Clean email → Compute preview)
+//                 makes the dataflow unambiguous and bug-free.
+{{ $json.body_clean.slice(0, 500) }}
 ```
+
+### 4.1 Why the Prompts node is separate from Config
+
+`Config` holds **deployment-time** values (spreadsheet id, Slack channel, signature, model name, temperature). `Prompts` holds **prompt-engineering-time** values (the two system prompts). They are split because:
+
+1. Prompt-engineering iterations should produce a one-field diff on the `Prompts` node only — easy to review.
+2. The Set node UI hits a usability cliff above ~8 fields; splitting keeps both nodes scannable.
+3. Different humans own the two: ops owns Config, the AI Engineer owns Prompts. The split makes ownership visible on the canvas.
 
 ## 5. Classification node configuration
 
@@ -149,14 +164,32 @@ Two acceptable patterns; we implement **Pattern A** because it requires no schem
   - `recipients = $json.sender_email`
 - The node's `Send` operation is **explicitly absent** from the workflow JSON. `scripts/check_no_send.py` parses every workflow and fails CI if any node has `operation == "send"`.
 
-## 9. Slack Block-Kit card
+## 9. Slack notification (parallel branch + color-coded attachment)
 
-| Block         | Content                                                                 |
-|---------------|--------------------------------------------------------------------------|
-| `header`      | `🚀 New lead — {priority}` with emoji color per priority                 |
-| `section.fields` | `From`, `Subject`, `Confidence` (`{{$json.confidence * 100}}%`), `Domain` |
-| `section.text`| First 300 chars of `body_clean`                                          |
-| `actions`     | Button **Open draft in Gmail** → `https://mail.google.com/mail/u/0/#drafts/{{$json.draft_id}}` |
+After `Append leads` succeeds, the LEAD branch fans out into a **parallel pair**:
+
+```
+Append leads ──▶ Draft reply ──▶ Create Gmail draft ──▶ Wait for draft id ──▶ Post lead card
+```
+
+`Wait for draft id` is a tiny `Wait` node (250 ms) inserted **only** to give `Create Gmail draft`'s response a chance to materialise in `$json.id` before the Slack node templates it into the *Open draft in Gmail* button. Without it, parallel execution can race and produce a Slack card with an empty draft link.
+
+The Slack payload uses the **attachment-style Block Kit** (not just `blocks`) because the attachment wrapper is the only documented place Slack honours a `color` field, which we use to colour-code priority:
+
+| Priority | Color hex   | Reason                       |
+|----------|-------------|------------------------------|
+| HIGH     | `#E01E5A`   | Slack-brand red — eye-catch  |
+| MEDIUM   | `#ECB22E`   | Slack-brand amber            |
+| LOW      | `#2EB67D`   | Slack-brand green            |
+
+Card contents:
+
+| Block            | Content                                                                                                       |
+|------------------|----------------------------------------------------------------------------------------------------------------|
+| `header`         | `🚨 / ⚠️ / 🟢 New lead — {priority}` with priority emoji + brand color via the enclosing attachment             |
+| `section.fields` | `From`, `Subject`, `Confidence` (`{{$json.confidence * 100}}%`), `Domain`                                      |
+| `section.text`   | `body_preview` (already capped at 500 chars by the `Compute preview` Set node)                                 |
+| `actions`        | Button **Open draft in Gmail** → `https://mail.google.com/mail/u/0/#drafts/{{$node["Create Gmail draft"].json.id}}` |
 
 ## 10. Error handler sub-workflow
 

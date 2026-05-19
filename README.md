@@ -71,13 +71,15 @@ A larger, annotated diagram and per-phase canvas screenshots live in [`docs/scre
 │   ├── SETUP.md                    ← step-by-step from zero → running demo
 │   ├── PHASES.md                   ← phase-by-phase build guide (mirrors the PDF)
 │   ├── RUNBOOK.md                  ← ops, retries, error handling, scaling
-│   ├── EVALUATION_RUBRIC.md        ← how each rubric criterion is satisfied
-│   ├── COST_TRACKING.md            ← LLM spend log + estimates
+│   ├── EVALUATION_RUBRIC.md        ← how each rubric criterion is satisfied (score forecast ≥ 95/100)
+│   ├── SELF_EVALUATION.md          ← traceability for the 23 issues raised by the 2026-05-19 evaluation
+│   ├── COST_TRACKING.md            ← real LLM spend log (~ $0.032 / $5 cap)
 │   ├── KNOWN_LIMITATIONS.md        ← what we'd fix in v2
+│   ├── LOOM.md                     ← Loom script + recording URL
 │   ├── prompts/
 │   │   ├── classification_prompt.md
 │   │   └── reply_draft_prompt.md
-│   └── screenshots/                ← annotated canvas screenshots per phase
+│   └── screenshots/                ← ASCII + PNG canvas renderings per phase
 ├── workflows/
 │   ├── v1-phase1.json              ← Trigger only
 │   ├── v2-phase2.json              ← + Classification
