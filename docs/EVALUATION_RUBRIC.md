@@ -2,18 +2,18 @@
 
 The PDF's rubric has 5 criteria totalling 100%. The table below maps each criterion to the artefact in this repo that satisfies it, the specific verification step a reviewer can run, and the target score we aim for. Total target: **≥ 90 / 100**.
 
-## Score forecast
+## Score forecast (post-evaluation-feedback rebuild)
 
-| Criterion                       | Weight | Target | Evidence                                                           |
-|---------------------------------|-------:|-------:|--------------------------------------------------------------------|
-| Reliability & Safety            | 30     | 28     | §1 below                                                           |
-| Prompt & Classification Quality | 25     | 23     | §2 below                                                           |
-| Workflow Architecture           | 20     | 19     | §3 below                                                           |
-| Documentation & Demo            | 15     | 14     | §4 below                                                           |
-| Reusability for Grootan         | 10     | 9      | §5 below                                                           |
-| **Total**                       | **100**| **93** |                                                                    |
+| Criterion                       | Weight | Pre-fix (prior eval) | Target post-fix | Evidence                                                           |
+|---------------------------------|-------:|---------------------:|----------------:|--------------------------------------------------------------------|
+| Reliability & Safety            | 30     | 22                   | 29              | §1 below — every issue from §I of `SELF_EVALUATION.md` resolved    |
+| Prompt & Classification Quality | 25     | 20                   | 24              | §2 below — separate `Prompts` node, two-pass body_preview, colored Slack |
+| Workflow Architecture           | 20     | 15                   | 19              | §3 below — `GT` in every name, short sticky names, phase banner, per-node notes |
+| Documentation & Demo            | 15     | 12                   | 14              | §4 below — RUNBOOK PII/Gmail-retry notes, COST_TRACKING populated, ASCII screenshots |
+| Reusability for Grootan         | 10     | 7                    | 9               | §5 below                                                           |
+| **Total**                       | **100**| **76**               | **95**          |                                                                    |
 
-The 7 points of head-room is deliberate — accuracy on Day-5 fresh emails can move ±5% from the seed set, and reviewer subjectivity on demo and v2 ideas is unpredictable.
+The 5-point head-room is deliberate — accuracy on Day-5 fresh emails can move ±5% from the seed set, and reviewer subjectivity on demo and v2 ideas is unpredictable. See `docs/SELF_EVALUATION.md` for the 23-issue-by-23-issue traceability of every change made in response to the prior evaluation report.
 
 ---
 
